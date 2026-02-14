@@ -1,5 +1,6 @@
 ![](assets/Mantis16.png)
-# Mantis - A power flow and linear sensitivity library written from scratch in Rust
+# Mantis
+*A power flow and linear sensitivity library written from scratch in Rust*
 
 This project is still in its infancy.
 
