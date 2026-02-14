@@ -19,3 +19,14 @@ This project is still in its infancy.
         - PV
         - QV
 - Contingency analysis
+
+## Installation
+
+Build and run via cargo after creating a local copy of the repository
+
+```bash
+git clone https://github.com/SklorGalore/mantis.git
+cd mantis
+cargo build
+cargo run
+```
