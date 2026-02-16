@@ -149,15 +149,15 @@ pub mod load_flow {
         pub gen_status: bool,
 
         // Setpoints
-        pub p_gen: f64,
-        pub q_gen: f64,
-        pub v_setpoint: f64,
+        pub p_gen: f32,
+        pub q_gen: f32,
+        pub v_setpoint: f32,
 
         // Limits
-        pub p_min: f64,
-        pub p_max: f64,
-        pub q_min: f64,
-        pub q_max: f64,
+        pub p_min: f32,
+        pub p_max: f32,
+        pub q_min: f32,
+        pub q_max: f32,
     }
 
     impl fmt::Display for Generator {
@@ -414,14 +414,14 @@ pub mod load_flow {
                     if fields.len() >= 17 {
                         let bus_id: usize = fields[0].trim().parse().unwrap_or(0);
                         let name = strip_extras(fields[1]);
-                        let pg: f64 = fields[2].trim().parse().unwrap_or(0.0);
-                        let qg: f64 = fields[3].trim().parse().unwrap_or(0.0);
-                        let qt: f64 = fields[4].trim().parse().unwrap_or(0.0);
-                        let qb: f64 = fields[5].trim().parse().unwrap_or(0.0);
-                        let vs: f64 = fields[6].trim().parse().unwrap_or(1.0);
+                        let pg: f32 = fields[2].trim().parse().unwrap_or(0.0);
+                        let qg: f32 = fields[3].trim().parse().unwrap_or(0.0);
+                        let qt: f32 = fields[4].trim().parse().unwrap_or(0.0);
+                        let qb: f32 = fields[5].trim().parse().unwrap_or(0.0);
+                        let vs: f32 = fields[6].trim().parse().unwrap_or(1.0);
                         let status: u8 = fields[14].trim().parse().unwrap_or(1);
-                        let pt: f64 = fields[16].trim().parse().unwrap_or(0.0);
-                        let pb: f64 = fields[17].trim().parse().unwrap_or(0.0);
+                        let pt: f32 = fields[16].trim().parse().unwrap_or(0.0);
+                        let pb: f32 = fields[17].trim().parse().unwrap_or(0.0);
 
                         network.generators.push(Generator {
                             gen_id,
