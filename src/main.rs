@@ -1,8 +1,17 @@
 use log::info;
+use std::env;
 use std::fs;
-use std::io::{self, BufRead};
+
+use mantis::load_flow::read_case;
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        eprintln!("Usage: mantis <path-to-raw-file>");
+        std::process::exit(1);
+    }
+    let path = &args[1];
+
     // establish log file as log.log
     let log_file = fs::File::create("log.log").expect("Could not create log file");
 
@@ -14,17 +23,23 @@ fn main() {
 
     info!("Beginning run...");
 
-    // path to case
-    let path = "cases/Hawaii40_20231026.RAW";
-    read_case(path);
-}
+    let network = read_case(path);
 
-fn read_case(path: &str) {
-    // store case as a string
-    let file = fs::File::open(path).expect("Could not read file path.");
+    info!(
+        "Loaded case '{}': {} buses, {} loads, {} generators, {} branches",
+        network.case_name,
+        network.buses.len(),
+        network.loads.len(),
+        network.generators.len(),
+        network.branches.len(),
+    );
 
-    // Consumes the iterator, returns an (Optional) String
-    for line in io::BufReader::new(file).lines().map_while(Result::ok) {
-        ()
-    }
+    println!(
+        "Loaded case '{}': {} buses, {} loads, {} generators, {} branches",
+        network.case_name,
+        network.buses.len(),
+        network.loads.len(),
+        network.generators.len(),
+        network.branches.len(),
+    );
 }
