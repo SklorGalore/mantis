@@ -1,14 +1,27 @@
 pub mod load_flow {
     use core::f32;
     use log::info;
+    use std::fmt;
     use std::fs;
     use std::io::{self, BufRead};
 
     #[derive(Debug, Clone, Copy, PartialEq)]
     pub enum BusType {
-        Slack,
-        PQ,
-        PV,
+        Slack, // slack, swing, Vd, reference bus
+        PQ,    // load bus
+        PV,    // generator bus
+        OOS,   // out of service
+    }
+
+    impl fmt::Display for BusType {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                BusType::Slack => write!(f, "Slack"),
+                BusType::PQ => write!(f, "PQ"),
+                BusType::PV => write!(f, "PV"),
+                BusType::OOS => write!(f, "OOS"),
+            }
+        }
     }
 
     #[derive(Debug, Clone)]
@@ -35,6 +48,21 @@ pub mod load_flow {
         pub v_max_contingency: f32,
     }
 
+    impl fmt::Display for Bus {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "Bus {:>3} {:<14} {:>5} {:>7.4} kV  |V|={:.6}  Angle={:>9.6}",
+                self.bus_id,
+                self.bus_name,
+                self.bus_type,
+                self.nom_voltage,
+                self.voltage,
+                self.angle
+            )
+        }
+    }
+
     pub struct Load {
         pub load_id: usize,
         pub load_name: String,
@@ -43,9 +71,28 @@ pub mod load_flow {
         pub imag_load: f32,
     }
 
+    impl fmt::Display for Load {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "Load {:>3} {:<20} P={:>9.3} MW  Q={:>9.3} MVAR",
+                self.load_id, self.load_name, self.real_load, self.imag_load
+            )
+        }
+    }
+
     pub enum BranchType {
         Line,
         TwoWinding,
+    }
+
+    impl fmt::Display for BranchType {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                BranchType::Line => write!(f, "Line"),
+                BranchType::TwoWinding => write!(f, "Xfmr"),
+            }
+        }
     }
 
     pub struct Branch {
@@ -74,6 +121,25 @@ pub mod load_flow {
         pub contingency_limit: f32,
     }
 
+    impl fmt::Display for Branch {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "{:<4} {:>3} {:<16} {:>3}->{:<3}  R={:>10.6}  X={:>10.6}  Tap={:.4}  RateA={:>7.1} RateB={:>7.1}",
+                self.branch_code,
+                self.id,
+                self.branch_name,
+                self.from_bus,
+                self.to_bus,
+                self.resistance,
+                self.reactance,
+                self.tap_ratio,
+                self.operating_limit,
+                self.contingency_limit,
+            )
+        }
+    }
+
     #[derive(Debug, Clone)]
     pub struct Generator {
         // Identifiers
@@ -94,6 +160,21 @@ pub mod load_flow {
         pub q_max: f64,
     }
 
+    impl fmt::Display for Generator {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "Gen {:>3} {:<16} Bus {:>3}  P={:>9.3} MW  Q={:>9.3} MVAR  Vset={:.5}",
+                self.gen_id,
+                self.gen_name,
+                self.gen_bus_id,
+                self.p_gen,
+                self.q_gen,
+                self.v_setpoint
+            )
+        }
+    }
+
     pub struct Network {
         pub case_name: String,
         pub s_base: f32,
@@ -103,6 +184,46 @@ pub mod load_flow {
         pub branches: Vec<Branch>,
         pub loads: Vec<Load>,
         pub generators: Vec<Generator>,
+    }
+
+    impl fmt::Display for Network {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            writeln!(
+                f,
+                "Case: {}  Sbase: {} MVA  Frequency: {} Hz",
+                self.case_name, self.s_base, self.frequency
+            )?;
+            writeln!(
+                f,
+                "{} buses, {} loads, {} generators, {} branches\n",
+                self.buses.len(),
+                self.loads.len(),
+                self.generators.len(),
+                self.branches.len()
+            )?;
+
+            writeln!(f, "=== Buses ===")?;
+            for bus in &self.buses {
+                writeln!(f, "  {}", bus)?;
+            }
+
+            writeln!(f, "\n=== Loads ===")?;
+            for load in &self.loads {
+                writeln!(f, "  {}", load)?;
+            }
+
+            writeln!(f, "\n=== Generators ===")?;
+            for generator in &self.generators {
+                writeln!(f, "  {}", generator)?;
+            }
+
+            writeln!(f, "\n=== Branches ===")?;
+            for branch in &self.branches {
+                writeln!(f, "  {}", branch)?;
+            }
+
+            Ok(())
+        }
     }
 
     impl Network {
@@ -120,14 +241,20 @@ pub mod load_flow {
         }
     }
 
-    /// Strip surrounding single quotes and trim whitespace from a PSS/E string field.
-    fn strip_quotes(s: &str) -> String {
+    /// strip slashes or quotes from fields
+    fn strip_extras(s: &str) -> String {
         s.trim().trim_matches('\'').trim().to_string()
     }
 
-    /// Parse a PSS/E v33 RAW file into a Network.
-    pub fn read_case(path: &str) -> Network {
-        let file = fs::File::open(path).expect("Could not read file path.");
+    /// Parses a PSS/E RAW file into a Network.
+    pub fn read_case_v33(path: &str) -> Network {
+        let file = match fs::File::open(path) {
+            Ok(f) => f,
+            Err(e) => {
+                eprintln!("Failed to open {}: {}", path, e);
+                std::process::exit(1);
+            }
+        };
         let lines: Vec<String> = io::BufReader::new(file)
             .lines()
             .map_while(Result::ok)
@@ -163,21 +290,26 @@ pub mod load_flow {
         }
 
         let mut section = Section::Bus;
-        let mut line_idx = 3; // skip 3 header lines
+
+        // skip 3 header lines
+        let mut line_number = 3;
+
+        // Branch, generator, and load ids should start at 1.
         let mut branch_id: usize = 1;
         let mut gen_id: usize = 1;
         let mut load_id: usize = 1;
 
-        while line_idx < lines.len() {
-            let line = &lines[line_idx];
+        'lineloop: while line_number < lines.len() {
+            let line = &lines[line_number];
             let trimmed = line.trim();
 
-            // Check for end-of-section delimiter or end of file
-            if trimmed == "Q" {
-                break;
+            // Check for end of file
+            if trimmed.starts_with("Q") {
+                break 'lineloop;
             }
 
-            if trimmed.starts_with("0 /") || trimmed.starts_with("0 /") {
+            // Proceed to the next section (delimiter lines are "0 / ..." or "0 /...")
+            if trimmed == "0" || trimmed.starts_with("0 /") || trimmed.starts_with("0 /") {
                 section = match section {
                     Section::Bus => Section::Load,
                     Section::Load => Section::FixedShunt,
@@ -187,18 +319,20 @@ pub mod load_flow {
                     Section::Transformer => Section::Done,
                     Section::Done => Section::Done,
                 };
-                line_idx += 1;
+
+                // No data to parse in section headers; move on.
+                line_number += 1;
                 continue;
             }
 
             if section == Section::Done {
                 // Skip remaining sections (area, zone, owner, etc.)
-                line_idx += 1;
+                line_number += 1;
                 continue;
             }
 
             if trimmed.is_empty() {
-                line_idx += 1;
+                line_number += 1;
                 continue;
             }
 
@@ -208,7 +342,7 @@ pub mod load_flow {
                     let fields: Vec<&str> = trimmed.split(',').collect();
                     if fields.len() >= 13 {
                         let bus_id: usize = fields[0].trim().parse().unwrap_or(0);
-                        let bus_name = strip_quotes(fields[1]);
+                        let bus_name = strip_extras(fields[1]);
                         let nom_voltage: f32 = fields[2].trim().parse().unwrap_or(0.0);
                         let ide: u8 = fields[3].trim().parse().unwrap_or(1);
                         let voltage: f32 = fields[7].trim().parse().unwrap_or(1.0);
@@ -221,7 +355,12 @@ pub mod load_flow {
                         let bus_type = match ide {
                             3 => BusType::Slack,
                             2 => BusType::PV,
-                            _ => BusType::PQ,
+                            1 => BusType::PQ,
+                            4 => BusType::OOS,
+                            _ => {
+                                eprintln!("Unknown bus type code: {}", ide);
+                                std::process::exit(1);
+                            }
                         };
 
                         network.buses.push(Bus {
@@ -229,6 +368,7 @@ pub mod load_flow {
                             bus_name,
                             bus_type,
                             nom_voltage,
+                            // bus is in service if the code is not 4
                             bus_status: ide != 4,
                             voltage,
                             angle,
@@ -247,7 +387,7 @@ pub mod load_flow {
                     let fields: Vec<&str> = trimmed.split(',').collect();
                     if fields.len() >= 7 {
                         let bus_id: usize = fields[0].trim().parse().unwrap_or(0);
-                        let name = strip_quotes(fields[1]);
+                        let name = strip_extras(fields[1]);
                         let status: u8 = fields[2].trim().parse().unwrap_or(1);
                         let pl: f32 = fields[5].trim().parse().unwrap_or(0.0);
                         let ql: f32 = fields[6].trim().parse().unwrap_or(0.0);
@@ -273,7 +413,7 @@ pub mod load_flow {
                     let fields: Vec<&str> = trimmed.split(',').collect();
                     if fields.len() >= 17 {
                         let bus_id: usize = fields[0].trim().parse().unwrap_or(0);
-                        let name = strip_quotes(fields[1]);
+                        let name = strip_extras(fields[1]);
                         let pg: f64 = fields[2].trim().parse().unwrap_or(0.0);
                         let qg: f64 = fields[3].trim().parse().unwrap_or(0.0);
                         let qt: f64 = fields[4].trim().parse().unwrap_or(0.0);
@@ -306,7 +446,7 @@ pub mod load_flow {
                     if fields.len() >= 14 {
                         let from_bus: usize = fields[0].trim().parse().unwrap_or(0);
                         let to_bus: usize = fields[1].trim().parse().unwrap_or(0);
-                        let name = strip_quotes(fields[2]);
+                        // let name = strip_extras(fields[2]);
                         let r: f32 = fields[3].trim().parse().unwrap_or(0.0);
                         let x: f32 = fields[4].trim().parse().unwrap_or(0.0);
                         let b: f32 = fields[5].trim().parse().unwrap_or(0.0);
@@ -323,7 +463,7 @@ pub mod load_flow {
                             id: branch_id,
                             from_bus,
                             to_bus,
-                            branch_name: format!("{}-{}-{}", from_bus, to_bus, name),
+                            branch_name: String::from("            "),
                             branch_status: status == 1,
                             resistance: r,
                             reactance: x,
@@ -348,24 +488,24 @@ pub mod load_flow {
                     // Line 4: WINDV2, NOMV2
                     let fields: Vec<&str> = trimmed.split(',').collect();
                     if fields.len() < 5 {
-                        line_idx += 1;
+                        line_number += 1;
                         continue;
                     }
 
                     let from_bus: usize = fields[0].trim().parse().unwrap_or(0);
                     let to_bus: usize = fields[1].trim().parse().unwrap_or(0);
                     let k: i32 = fields[2].trim().parse().unwrap_or(0);
-                    let name = strip_quotes(fields[3]);
+                    // let name = strip_extras(fields[3]);
                     let status: u8 = fields[11].trim().parse().unwrap_or(1);
 
                     let is_three_winding = k != 0;
 
                     // Line 2: impedance data
-                    line_idx += 1;
-                    if line_idx >= lines.len() {
+                    line_number += 1;
+                    if line_number >= lines.len() {
                         break;
                     }
-                    let imp_line = lines[line_idx].trim();
+                    let imp_line = lines[line_number].trim();
                     let imp_fields: Vec<&str> = imp_line.split(',').collect();
                     let r: f32 = imp_fields
                         .first()
@@ -377,11 +517,11 @@ pub mod load_flow {
                         .unwrap_or(0.0);
 
                     // Line 3: winding 1 data
-                    line_idx += 1;
-                    if line_idx >= lines.len() {
+                    line_number += 1;
+                    if line_number >= lines.len() {
                         break;
                     }
-                    let w1_line = lines[line_idx].trim();
+                    let w1_line = lines[line_number].trim();
                     let w1_fields: Vec<&str> = w1_line.split(',').collect();
                     let tap_ratio: f32 = w1_fields
                         .first()
@@ -401,15 +541,15 @@ pub mod load_flow {
                         .unwrap_or(0.0);
 
                     // Line 4: winding 2 data
-                    line_idx += 1;
-                    if line_idx >= lines.len() {
+                    line_number += 1;
+                    if line_number >= lines.len() {
                         break;
                     }
 
                     // For three-winding transformers, there's a 5th line (winding 3)
                     if is_three_winding {
-                        line_idx += 1;
-                        if line_idx >= lines.len() {
+                        line_number += 1;
+                        if line_number >= lines.len() {
                             break;
                         }
                     }
@@ -419,7 +559,7 @@ pub mod load_flow {
                         id: branch_id,
                         from_bus,
                         to_bus,
-                        branch_name: format!("{}-{}-{}", from_bus, to_bus, name),
+                        branch_name: String::from("            "),
                         branch_status: status == 1,
                         resistance: r,
                         reactance: x,
@@ -438,7 +578,7 @@ pub mod load_flow {
                 Section::Done => {}
             }
 
-            line_idx += 1;
+            line_number += 1;
         }
 
         info!(

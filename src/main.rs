@@ -2,7 +2,7 @@ use log::info;
 use std::env;
 use std::fs;
 
-use mantis::load_flow::read_case;
+use mantis;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -23,7 +23,7 @@ fn main() {
 
     info!("Beginning run...");
 
-    let network = read_case(path);
+    let network = mantis::load_flow::read_case_v33(path);
 
     info!(
         "Loaded case '{}': {} buses, {} loads, {} generators, {} branches",
@@ -34,12 +34,5 @@ fn main() {
         network.branches.len(),
     );
 
-    println!(
-        "Loaded case '{}': {} buses, {} loads, {} generators, {} branches",
-        network.case_name,
-        network.buses.len(),
-        network.loads.len(),
-        network.generators.len(),
-        network.branches.len(),
-    );
+    println!("{}", network);
 }
