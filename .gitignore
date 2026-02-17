@@ -1,6 +1,5 @@
 /target
 CLAUDE.md
 /cases
-clippy.log
-out.log
-out.txt
+*.log
+*.txt

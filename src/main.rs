@@ -23,7 +23,7 @@ fn main() {
 
     info!("Beginning run...");
 
-    let network = mantis::load_flow::read_case_v33(path);
+    let network = mantis::parse::read_case_v33(path);
 
     info!(
         "Loaded case '{}': {} buses, {} loads, {} generators, {} branches",
@@ -35,4 +35,5 @@ fn main() {
     );
 
     println!("{}", network);
+    network.fast_decoupled();
 }
