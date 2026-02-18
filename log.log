@@ -1,84 +1,173 @@
-[2026-02-17T03:59:30Z INFO  mantis] Beginning run...
-[2026-02-17T03:59:30Z INFO  mantis::parse] Parsed 37 buses, 27 loads, 45 generators, 89 branches
-[2026-02-17T03:59:30Z INFO  mantis] Loaded case 'October 26, 2023 09:04:49; Simulator Version 23; BuildDate 2023_8_27': 37 buses, 27 loads, 45 generators, 89 branches
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] Found     36 non-slack buses
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:      4
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:      4
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:     21
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:     23
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:     23
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:     33
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:     33
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      1, j:      3
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      1, j:      5
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      1, j:      5
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      1, j:      6
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      1, j:     20
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      1, j:     24
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      1, j:     24
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      2, j:      5
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      2, j:      5
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      2, j:     15
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      2, j:     18
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      2, j:     18
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      2, j:     18
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      2, j:     20
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      3, j:     12
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      4, j:      8
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      4, j:     13
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      6, j:      5
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      6, j:      5
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      6, j:      5
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      5, j:     10
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      5, j:     11
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      5, j:     11
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      6, j:      9
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      6, j:     12
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      6, j:     12
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      6, j:     12
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      7, j:     14
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      7, j:     18
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      7, j:     18
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      8, j:     13
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     10, j:     12
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     10, j:     14
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     11, j:     14
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     11, j:     16
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     12, j:     15
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     15, j:     17
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     16, j:     17
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     19, j:     28
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     19, j:     30
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     21, j:     23
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     21, j:     35
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     22, j:     24
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     22, j:     24
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     22, j:     31
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     22, j:     34
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     23, j:     33
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     23, j:     33
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     23, j:     35
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     23, j:     35
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     25, j:     27
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     26, j:     28
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     26, j:     28
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     26, j:     29
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     27, j:     28
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     27, j:     30
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     29, j:     31
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     31, j:     32
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     31, j:     32
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     33, j:     35
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:      1
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:      1
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      0, j:      1
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      4, j:      5
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:      8, j:      9
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     13, j:     14
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     13, j:     14
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     23, j:     24
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] i:     23, j:     24
-[2026-02-17T03:59:30Z DEBUG mantis::loadflow] B'=
+[2026-02-18T01:35:32Z INFO  mantis] Beginning run...
+[2026-02-18T01:35:32Z INFO  mantis::parse] Parsed 37 buses, 27 loads, 45 generators, 89 branches
+[2026-02-18T01:35:32Z INFO  mantis] Loaded case 'October 26, 2023 09:04:49; Simulator Version 23; BuildDate 2023_8_27': 37 buses, 27 loads, 45 generators, 89 branches
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] Found     36 non-slack buses
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 5 is -294.11765
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:      4
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 5 is -294.11765
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:      4
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 22 is -267.37967
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:     21
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 25 is -346.02078
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:     23
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 25 is -346.02078
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:     23
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 35 is -92.59259
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:     33
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 35 is -92.59259
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:     33
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 4 is -23.277468
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      1, j:      3
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 6 is -37.188545
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      1, j:      5
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 6 is -37.188545
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      1, j:      5
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 7 is -36.31082
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      1, j:      6
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 21 is -27.427317
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      1, j:     20
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 23 is -30.656038
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 23 is -30.656038
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 23 is -30.656038
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 26 is -32.797638
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      1, j:     24
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 2 to 26 is -32.797638
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      1, j:     24
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 3 to 6 is -67.659
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      2, j:      5
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 3 to 6 is -67.659
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      2, j:      5
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 3 to 16 is -41.96391
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      2, j:     15
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 3 to 19 is -72.3589
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      2, j:     18
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 3 to 19 is -72.3589
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      2, j:     18
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 3 to 19 is -72.3589
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      2, j:     18
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 3 to 21 is -41.271152
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      2, j:     20
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 4 to 13 is -82.37232
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      3, j:     12
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 5 to 9 is -436.6812
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      4, j:      8
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 5 to 14 is -174.21603
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      4, j:     13
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 7 to 6 is -249.99998
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      6, j:      5
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 7 to 6 is -249.99998
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      6, j:      5
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 7 to 6 is -249.99998
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      6, j:      5
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 6 to 11 is -50.50505
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      5, j:     10
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 6 to 12 is -73.31378
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      5, j:     11
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 6 to 12 is -73.31378
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      5, j:     11
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 7 to 10 is -249.99998
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      6, j:      9
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 7 to 13 is -106.26992
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      6, j:     12
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 7 to 13 is -106.26992
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      6, j:     12
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 7 to 13 is -106.26992
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      6, j:     12
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 8 to 15 is -31.857279
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      7, j:     14
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 8 to 19 is -27.034332
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      7, j:     18
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 8 to 19 is -27.034332
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      7, j:     18
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 9 to 14 is -107.18114
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      8, j:     13
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 11 to 13 is -54.229935
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     10, j:     12
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 11 to 15 is -42.955326
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     10, j:     14
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 12 to 15 is -66.181335
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     11, j:     14
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 12 to 17 is -43.89816
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     11, j:     16
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 13 to 16 is -76.394196
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     12, j:     15
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 16 to 18 is -64.391495
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     15, j:     17
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 17 to 18 is -101.626015
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     16, j:     17
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 19 to 23 is -79.49126
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 19 to 23 is -79.49126
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 19 to 23 is -79.49126
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 19 to 23 is -79.49126
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 20 to 23 is -23.441162
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 20 to 30 is -35.971226
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     19, j:     28
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 20 to 32 is -66.9344
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     19, j:     30
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 22 to 25 is -335.57047
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     21, j:     23
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 22 to 37 is -146.62756
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     21, j:     35
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 23 to 34 is -33.1785
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 23 to 34 is -33.1785
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 24 to 26 is -60.79027
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     22, j:     24
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 24 to 26 is -60.79027
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     22, j:     24
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 24 to 33 is -59.1716
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     22, j:     31
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 24 to 36 is -52.826202
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     22, j:     34
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 25 to 35 is -242.13077
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     23, j:     33
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 25 to 35 is -242.13077
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     23, j:     33
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 25 to 37 is -204.49898
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     23, j:     35
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 25 to 37 is -204.49898
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     23, j:     35
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 27 to 29 is -41.87605
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     25, j:     27
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 28 to 30 is -89.28572
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     26, j:     28
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 28 to 30 is -89.28572
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     26, j:     28
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 28 to 31 is -19.580967
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     26, j:     29
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 29 to 30 is -67.61325
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     27, j:     28
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 29 to 32 is -43.196545
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     27, j:     30
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 31 to 33 is -37.091988
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     29, j:     31
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 33 to 34 is -28.344671
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     31, j:     32
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 33 to 34 is -28.344671
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     31, j:     32
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 35 to 37 is -657.8947
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     33, j:     35
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 2 is -8.079763
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:      1
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 2 is -8.079763
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:      1
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 1 to 2 is -8.079763
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      0, j:      1
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 5 to 6 is -7.165428
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      4, j:      5
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 9 to 10 is -7.958362
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:      8, j:      9
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 14 to 15 is -7.6032906
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     13, j:     14
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 14 to 15 is -7.6032906
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     13, j:     14
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 22 to 23 is -8.577801
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 22 to 23 is -8.577801
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 22 to 23 is -8.577801
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 25 to 26 is -6.7904797
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     23, j:     24
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] b matrix entry for branch from 25 to 26 is -6.7904797
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] i:     23, j:     24
+[2026-02-18T01:35:32Z DEBUG mantis::loadflow] B'=
     
       ┌                                                                                                                                                                                                                                                                                                                                                                                                             ┐
       │ -1757.0807   24.23929          0          0   588.2353          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  267.37967          0  692.04156          0          0          0          0          0          0          0          0          0  185.18518          0          0 │

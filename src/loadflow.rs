@@ -17,6 +17,10 @@ impl Network {
 
             // mutual admittance Y_ij = -sum(admittance between bus i and j)
             let b = -1.0 / branch.reactance;
+            debug!(
+                "b matrix entry for branch from {} to {} is {}",
+                branch.from_bus, branch.to_bus, b
+            );
 
             // admittance matrix indices for from and to bus
             let from = self.bus_map.get(&branch.from_bus);

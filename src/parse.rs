@@ -223,7 +223,7 @@ pub fn read_case_v33(path: &str) -> Network {
                     let status: u8 = fields[13].trim().parse().unwrap_or(1);
 
                     network.branches.push(Branch {
-                        branch_code: BranchType::Line,
+                        branch_type: BranchType::Line,
                         id: branch_index,
                         from_bus,
                         to_bus,
@@ -319,7 +319,7 @@ pub fn read_case_v33(path: &str) -> Network {
                 }
 
                 network.branches.push(Branch {
-                    branch_code: BranchType::TwoWinding,
+                    branch_type: BranchType::TwoWinding,
                     id: branch_index,
                     from_bus,
                     to_bus,

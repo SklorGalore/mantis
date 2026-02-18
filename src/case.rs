@@ -88,7 +88,7 @@ impl fmt::Display for BranchType {
 
 pub struct Branch {
     // Identifiers
-    pub branch_code: BranchType,
+    pub branch_type: BranchType,
     pub id: usize,
     pub from_bus: usize,
     pub to_bus: usize,
@@ -116,8 +116,8 @@ impl fmt::Display for Branch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:<4} {:>3} {:<16} {:>3}->{:<3}  R={:>10.6}  X={:>10.6}  Tap={:.4}  RateA={:>7.1} RateB={:>7.1}",
-            self.branch_code,
+            "Type: {:<4} Id: {:>3} Name: {:<16} From->To: {:>3} -> {:<3}  R={:>10.6}  X={:>10.6}  Tap={:.4}  RateA={:>7.1} RateB={:>7.1}",
+            self.branch_type,
             self.id,
             self.branch_name,
             self.from_bus,
