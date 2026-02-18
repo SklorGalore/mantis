@@ -2,8 +2,6 @@ use log::info;
 use std::env;
 use std::fs;
 
-use mantis;
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -35,5 +33,5 @@ fn main() {
     );
 
     println!("{}", network);
-    network.fast_decoupled();
+    network.dc_approximation();
 }

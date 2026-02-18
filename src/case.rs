@@ -43,6 +43,25 @@ pub struct Bus {
     pub v_max_operating: f32,
     pub v_max_contingency: f32,
 }
+impl Bus {
+    pub fn new(bus_id: usize, bus_name: String, bus_type: BusType) -> Self {
+        Self {
+            bus_id,
+            bus_name,
+            bus_status: bus_type != BusType::OOS,
+            bus_type,
+            nom_voltage: 0.0,
+            voltage: 1.0,
+            angle: 0.0,
+            real_shunt: 0.0,
+            imag_shunt: 0.0,
+            v_min_operating: 0.9,
+            v_min_contingency: 0.95,
+            v_max_operating: 1.05,
+            v_max_contingency: 1.1,
+        }
+    }
+}
 
 impl fmt::Display for Bus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -60,6 +79,17 @@ pub struct Load {
 
     pub real_load: f32,
     pub imag_load: f32,
+}
+
+impl Load {
+    pub fn new(load_id: usize, load_name: String, real_load: f32, imag_load: f32) -> Self {
+        Self {
+            load_id,
+            load_name,
+            real_load,
+            imag_load,
+        }
+    }
 }
 
 impl fmt::Display for Load {
@@ -112,6 +142,36 @@ pub struct Branch {
     pub contingency_limit: f32,
 }
 
+impl Branch {
+    pub fn new(
+        id: usize,
+        from_bus: usize,
+        to_bus: usize,
+        branch_type: BranchType,
+        resistance: f32,
+        reactance: f32,
+    ) -> Self {
+        Self {
+            id,
+            from_bus,
+            to_bus,
+            branch_type,
+            branch_name: String::new(),
+            branch_status: true,
+            resistance,
+            reactance,
+            from_shunt_conductance: 0.0,
+            from_shunt_susceptance: 0.0,
+            to_shunt_conductance: 0.0,
+            to_shunt_susceptance: 0.0,
+            tap_ratio: 1.0,
+            phase_shift: 0.0,
+            operating_limit: 0.0,
+            contingency_limit: 0.0,
+        }
+    }
+}
+
 impl fmt::Display for Branch {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -149,6 +209,24 @@ pub struct Generator {
     pub p_max: f32,
     pub q_min: f32,
     pub q_max: f32,
+}
+
+impl Generator {
+    pub fn new(gen_id: usize, gen_bus_id: usize, gen_name: String) -> Self {
+        Self {
+            gen_id,
+            gen_bus_id,
+            gen_name,
+            gen_status: true,
+            p_gen: 0.0,
+            q_gen: 0.0,
+            v_setpoint: 1.0,
+            p_min: 0.0,
+            p_max: 0.0,
+            q_min: 0.0,
+            q_max: 0.0,
+        }
+    }
 }
 
 impl fmt::Display for Generator {
