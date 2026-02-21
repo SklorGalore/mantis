@@ -46,7 +46,14 @@ pub fn network_to_raw(net: &Network) -> String {
     }
     out.push_str("0 / END OF LOAD DATA\n");
 
-    // === Fixed shunt section (empty) ===
+    // === Fixed shunt section ===
+    for shunt in &net.fixed_shunts {
+        let stat: u8 = if shunt.status { 1 } else { 0 };
+        out.push_str(&format!(
+            " {}, '{}', {}, {:.3}, {:.3}\n",
+            shunt.bus_id, shunt.shunt_id, stat, shunt.gl, shunt.bl,
+        ));
+    }
     out.push_str("0 / END OF FIXED SHUNT DATA\n");
 
     // === Generator section ===
@@ -118,6 +125,48 @@ pub fn network_to_raw(net: &Network) -> String {
         out.push_str(" 1.0, 0.0\n");
     }
     out.push_str("0 / END OF TRANSFORMER DATA\n");
+
+    // === Area section ===
+    for area in &net.areas {
+        out.push_str(&format!(
+            " {}, {}, {:.2}, {:.2}, '{}'\n",
+            area.area_id, area.slack_bus, area.p_desired, area.p_tolerance, area.area_name,
+        ));
+    }
+    out.push_str("0 / END OF AREA DATA\n");
+
+    // === Two-terminal DC, VSC DC, impedance correction, multi-terminal DC,
+    //     multi-section line, inter-area transfer, owner, FACTS sections (empty) ===
+    out.push_str("0 / END OF TWO-TERMINAL DC DATA\n");
+    out.push_str("0 / END OF VSC DC LINE DATA\n");
+    out.push_str("0 / END OF IMPEDANCE CORRECTION DATA\n");
+    out.push_str("0 / END OF MULTI-TERMINAL DC DATA\n");
+    out.push_str("0 / END OF MULTI-SECTION LINE DATA\n");
+
+    // === Zone section ===
+    for zone in &net.zones {
+        out.push_str(&format!(" {}, '{}'\n", zone.zone_id, zone.zone_name));
+    }
+    out.push_str("0 / END OF ZONE DATA\n");
+
+    out.push_str("0 / END OF INTER-AREA TRANSFER DATA\n");
+    out.push_str("0 / END OF OWNER DATA\n");
+    out.push_str("0 / END OF FACTS DEVICE DATA\n");
+
+    // === Switched shunt section ===
+    for shunt in &net.switched_shunts {
+        let stat: u8 = if shunt.status { 1 } else { 0 };
+        let mut line = format!(
+            " {}, {}, 0, {}, {:.4}, {:.4}, {}, 100.0, '            ', {:.4}",
+            shunt.bus_id, shunt.modsw, stat, shunt.v_hi, shunt.v_lo, shunt.remote_bus, shunt.b_init,
+        );
+        for (n, b) in &shunt.steps {
+            line.push_str(&format!(", {}, {:.4}", n, b));
+        }
+        line.push('\n');
+        out.push_str(&line);
+    }
+    out.push_str("0 / END OF SWITCHED SHUNT DATA\n");
 
     out.push_str("Q\n");
     out

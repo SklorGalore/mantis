@@ -50,6 +50,11 @@ pub fn parse_raw_str(content: &str) -> Network {
     let mut network = Network::new(case_name, s_base, frequency);
 
     // Track which section we're in
+    // PSS/E v33 section order:
+    // Bus, Load, FixedShunt, Generator, Branch, Transformer,
+    // Area, TwoTerminalDC, VscDCLine, ImpedanceCorrection,
+    // MultiTerminalDC, MultiSectionLine, Zone, InterAreaTransfer,
+    // Owner, Facts, SwitchedShunt, Done
     #[derive(PartialEq)]
     enum Section {
         Bus,
@@ -58,6 +63,17 @@ pub fn parse_raw_str(content: &str) -> Network {
         Generator,
         Branch,
         Transformer,
+        Area,
+        TwoTerminalDC,
+        VscDCLine,
+        ImpedanceCorrection,
+        MultiTerminalDC,
+        MultiSectionLine,
+        Zone,
+        InterAreaTransfer,
+        Owner,
+        Facts,
+        SwitchedShunt,
         Done,
     }
 
@@ -88,7 +104,18 @@ pub fn parse_raw_str(content: &str) -> Network {
                 Section::FixedShunt => Section::Generator,
                 Section::Generator => Section::Branch,
                 Section::Branch => Section::Transformer,
-                Section::Transformer => Section::Done,
+                Section::Transformer => Section::Area,
+                Section::Area => Section::TwoTerminalDC,
+                Section::TwoTerminalDC => Section::VscDCLine,
+                Section::VscDCLine => Section::ImpedanceCorrection,
+                Section::ImpedanceCorrection => Section::MultiTerminalDC,
+                Section::MultiTerminalDC => Section::MultiSectionLine,
+                Section::MultiSectionLine => Section::Zone,
+                Section::Zone => Section::InterAreaTransfer,
+                Section::InterAreaTransfer => Section::Owner,
+                Section::Owner => Section::Facts,
+                Section::Facts => Section::SwitchedShunt,
+                Section::SwitchedShunt => Section::Done,
                 Section::Done => Section::Done,
             };
 
@@ -98,7 +125,6 @@ pub fn parse_raw_str(content: &str) -> Network {
         }
 
         if section == Section::Done {
-            // Skip remaining sections (area, zone, owner, etc.)
             line_number += 1;
             continue;
         }
@@ -178,7 +204,23 @@ pub fn parse_raw_str(content: &str) -> Network {
             }
 
             Section::FixedShunt => {
-                // Skip fixed shunt data for now
+                // I, 'ID', STATUS, GL, BL
+                let fields: Vec<&str> = trimmed.split(',').collect();
+                if fields.len() >= 5 {
+                    let bus_id: usize = fields[0].trim().parse().unwrap_or(0);
+                    let shunt_id = strip_extras(fields[1]);
+                    let status: u8 = fields[2].trim().parse().unwrap_or(1);
+                    let gl: f32 = fields[3].trim().parse().unwrap_or(0.0);
+                    let bl: f32 = fields[4].trim().parse().unwrap_or(0.0);
+
+                    network.fixed_shunts.push(FixedShunt {
+                        bus_id,
+                        shunt_id,
+                        status: status != 0,
+                        gl,
+                        bl,
+                    });
+                }
             }
 
             Section::Generator => {
@@ -348,7 +390,85 @@ pub fn parse_raw_str(content: &str) -> Network {
                 branch_index += 1;
             }
 
-            Section::Done => {}
+            Section::Area => {
+                // I, ISW, PDES, PTOL, 'ARNAM'
+                let fields: Vec<&str> = trimmed.split(',').collect();
+                if fields.len() >= 5 {
+                    let area_id: usize = fields[0].trim().parse().unwrap_or(0);
+                    let slack_bus: usize = fields[1].trim().parse().unwrap_or(0);
+                    let p_desired: f32 = fields[2].trim().parse().unwrap_or(0.0);
+                    let p_tolerance: f32 = fields[3].trim().parse().unwrap_or(10.0);
+                    let area_name = strip_extras(fields[4]);
+
+                    network.areas.push(Area {
+                        area_id,
+                        slack_bus,
+                        p_desired,
+                        p_tolerance,
+                        area_name,
+                    });
+                }
+            }
+
+            Section::Zone => {
+                // I, 'ZONAM'
+                let fields: Vec<&str> = trimmed.split(',').collect();
+                if fields.len() >= 2 {
+                    let zone_id: usize = fields[0].trim().parse().unwrap_or(0);
+                    let zone_name = strip_extras(fields[1]);
+
+                    network.zones.push(Zone { zone_id, zone_name });
+                }
+            }
+
+            Section::SwitchedShunt => {
+                // I, MODSW, ADJM, STAT, VSWHI, VSWLO, SWREM, RMPCT, 'RMIDNT', BINIT,
+                // N1, B1, N2, B2, ..., N8, B8
+                let fields: Vec<&str> = trimmed.split(',').collect();
+                if fields.len() >= 10 {
+                    let bus_id: usize = fields[0].trim().parse().unwrap_or(0);
+                    let modsw: u8 = fields[1].trim().parse().unwrap_or(0);
+                    let stat: u8 = fields[3].trim().parse().unwrap_or(1);
+                    let v_hi: f32 = fields[4].trim().parse().unwrap_or(1.1);
+                    let v_lo: f32 = fields[5].trim().parse().unwrap_or(0.9);
+                    let remote_bus: usize = fields[6].trim().parse().unwrap_or(0);
+                    let b_init: f32 = fields[9].trim().parse().unwrap_or(0.0);
+
+                    // Remaining fields are (N1,B1) ... (N8,B8) step banks
+                    let mut steps: Vec<(i32, f32)> = Vec::new();
+                    let mut fi = 10;
+                    while fi + 1 < fields.len() {
+                        let n: i32 = fields[fi].trim().parse().unwrap_or(0);
+                        let b: f32 = fields[fi + 1].trim().parse().unwrap_or(0.0);
+                        if n != 0 {
+                            steps.push((n, b));
+                        }
+                        fi += 2;
+                    }
+
+                    network.switched_shunts.push(SwitchedShunt {
+                        bus_id,
+                        modsw,
+                        status: stat != 0,
+                        v_hi,
+                        v_lo,
+                        remote_bus,
+                        b_init,
+                        steps,
+                    });
+                }
+            }
+
+            // Sections we parse through but don't store
+            Section::TwoTerminalDC
+            | Section::VscDCLine
+            | Section::ImpedanceCorrection
+            | Section::MultiTerminalDC
+            | Section::MultiSectionLine
+            | Section::InterAreaTransfer
+            | Section::Owner
+            | Section::Facts
+            | Section::Done => {}
         }
 
         line_number += 1;
@@ -358,11 +478,15 @@ pub fn parse_raw_str(content: &str) -> Network {
     network.rebuild_bus_map();
 
     info!(
-        "Parsed {} buses, {} loads, {} generators, {} branches",
+        "Parsed {} buses, {} loads, {} generators, {} branches, {} fixed shunts, {} switched shunts, {} areas, {} zones",
         network.buses.len(),
         network.loads.len(),
         network.generators.len(),
         network.branches.len(),
+        network.fixed_shunts.len(),
+        network.switched_shunts.len(),
+        network.areas.len(),
+        network.zones.len(),
     );
 
     network

@@ -251,6 +251,106 @@ impl fmt::Display for Generator {
     }
 }
 
+/// Fixed shunt at a bus (PSS/E Fixed Shunt section).
+/// GL and BL are in MW and MVAR respectively at 1.0 pu voltage on the system MVA base.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FixedShunt {
+    pub bus_id: usize,
+    pub shunt_id: String,
+    pub status: bool,
+    pub gl: f32, // active component in MW at 1.0 pu voltage
+    pub bl: f32, // reactive component in MVAR at 1.0 pu voltage (positive = capacitive)
+}
+
+impl fmt::Display for FixedShunt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "FixedShunt Bus {:>3} ID {:<4} GL={:>8.3} MW  BL={:>8.3} MVAR",
+            self.bus_id, self.shunt_id, self.gl, self.bl
+        )
+    }
+}
+
+/// Switched shunt (capacitor/reactor bank) at a bus.
+/// Steps holds (count, susceptance_per_step_pu) pairs for each bank block.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SwitchedShunt {
+    pub bus_id: usize,
+    pub modsw: u8,       // 0=fixed, 1=discrete, 2=continuous, …
+    pub status: bool,
+    pub v_hi: f32,       // VSWHI: upper voltage limit (pu)
+    pub v_lo: f32,       // VSWLO: lower voltage limit (pu)
+    pub remote_bus: usize, // SWREM: 0 = local control
+    pub b_init: f32,     // BINIT: initial susceptance (pu on system base)
+    pub steps: Vec<(i32, f32)>, // (Nx, Bx) step banks, up to 8 pairs
+}
+
+impl SwitchedShunt {
+    /// Total minimum susceptance available (most capacitive bank fully in)
+    pub fn b_max(&self) -> f32 {
+        self.steps
+            .iter()
+            .map(|(n, b)| if *n > 0 { *n as f32 * b } else { 0.0 })
+            .sum()
+    }
+
+    /// Total minimum susceptance available (most inductive bank fully in)
+    pub fn b_min(&self) -> f32 {
+        self.steps
+            .iter()
+            .map(|(n, b)| if *n < 0 { *n as f32 * b } else { 0.0 })
+            .sum()
+    }
+}
+
+impl fmt::Display for SwitchedShunt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "SwitchedShunt Bus {:>3}  Binit={:>8.4} pu  Vlo={:.4}  Vhi={:.4}  Banks={}",
+            self.bus_id,
+            self.b_init,
+            self.v_lo,
+            self.v_hi,
+            self.steps.len()
+        )
+    }
+}
+
+/// Power system area with interchange scheduling data.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Area {
+    pub area_id: usize,
+    pub slack_bus: usize,  // ISW: area slack bus (0 = use system slack)
+    pub p_desired: f32,    // PDES: desired net export in MW
+    pub p_tolerance: f32,  // PTOL: interchange tolerance in MW
+    pub area_name: String,
+}
+
+impl fmt::Display for Area {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Area {:>3} {:<20} Slack={:>4}  Pdes={:>8.1} MW  Ptol={:.1} MW",
+            self.area_id, self.area_name, self.slack_bus, self.p_desired, self.p_tolerance
+        )
+    }
+}
+
+/// Electrical zone (grouping of buses for zonal analysis).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Zone {
+    pub zone_id: usize,
+    pub zone_name: String,
+}
+
+impl fmt::Display for Zone {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Zone {:>3} {}", self.zone_id, self.zone_name)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Network {
     pub case_name: String,
@@ -261,6 +361,10 @@ pub struct Network {
     pub branches: Vec<Branch>,
     pub loads: Vec<Load>,
     pub generators: Vec<Generator>,
+    pub fixed_shunts: Vec<FixedShunt>,
+    pub switched_shunts: Vec<SwitchedShunt>,
+    pub areas: Vec<Area>,
+    pub zones: Vec<Zone>,
     #[serde(skip)]
     pub bus_map: HashMap<usize, usize>, // bus_id -> matrix index (slack excluded)
 }
@@ -274,11 +378,15 @@ impl fmt::Display for Network {
         )?;
         writeln!(
             f,
-            "{} buses, {} loads, {} generators, {} branches\n",
+            "{} buses, {} loads, {} generators, {} branches, {} fixed shunts, {} switched shunts, {} areas, {} zones\n",
             self.buses.len(),
             self.loads.len(),
             self.generators.len(),
-            self.branches.len()
+            self.branches.len(),
+            self.fixed_shunts.len(),
+            self.switched_shunts.len(),
+            self.areas.len(),
+            self.zones.len(),
         )?;
 
         writeln!(f, "=== Buses ===")?;
@@ -301,6 +409,34 @@ impl fmt::Display for Network {
             writeln!(f, "  {}", branch)?;
         }
 
+        if !self.fixed_shunts.is_empty() {
+            writeln!(f, "\n=== Fixed Shunts ===")?;
+            for shunt in &self.fixed_shunts {
+                writeln!(f, "  {}", shunt)?;
+            }
+        }
+
+        if !self.switched_shunts.is_empty() {
+            writeln!(f, "\n=== Switched Shunts ===")?;
+            for shunt in &self.switched_shunts {
+                writeln!(f, "  {}", shunt)?;
+            }
+        }
+
+        if !self.areas.is_empty() {
+            writeln!(f, "\n=== Areas ===")?;
+            for area in &self.areas {
+                writeln!(f, "  {}", area)?;
+            }
+        }
+
+        if !self.zones.is_empty() {
+            writeln!(f, "\n=== Zones ===")?;
+            for zone in &self.zones {
+                writeln!(f, "  {}", zone)?;
+            }
+        }
+
         Ok(())
     }
 }
@@ -316,6 +452,10 @@ impl Network {
             branches: Vec::new(),
             loads: Vec::new(),
             generators: Vec::new(),
+            fixed_shunts: Vec::new(),
+            switched_shunts: Vec::new(),
+            areas: Vec::new(),
+            zones: Vec::new(),
             bus_map: HashMap::new(),
         }
     }

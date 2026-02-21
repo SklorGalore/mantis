@@ -6,64 +6,95 @@
 <title>Mantis Power Flow</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Dark mode (default) ── */
   :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --border: #2a2d3e;
-    --accent: #4f8ef7;
-    --accent-hover: #6fa5ff;
-    --text: #e0e4f0;
-    --text-dim: #7a7f9a;
+    --bg: #0b1a0e;
+    --surface: #112015;
+    --surface2: #172b1c;
+    --border: #1e3825;
+    --accent: #4caf6c;
+    --accent-hover: #6dd48e;
+    --accent-dim: rgba(76,175,108,0.15);
+    --text: #c8e6cc;
+    --text-dim: #6a9a73;
     --danger: #e05c5c;
-    --success: #4caf80;
-    --warn: #e09b3d;
+    --danger-dim: rgba(224,92,92,0.12);
+    --success: #4caf6c;
+    --warn: #c9b030;
+    --btn-hover: #1a3220;
+    --shadow: rgba(0,0,0,0.5);
   }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; height: 100vh; display: flex; flex-direction: column; }
-  header { display: flex; align-items: center; gap: 12px; padding: 0 20px; height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  header h1 { font-size: 18px; font-weight: 600; color: var(--accent); }
-  header .case-info { color: var(--text-dim); font-size: 12px; margin-left: auto; }
+  /* ── Light mode ── */
+  :root[data-theme="light"] {
+    --bg: #f0f7f1;
+    --surface: #ffffff;
+    --surface2: #e8f5eb;
+    --border: #b8dcc0;
+    --accent: #2a7a44;
+    --accent-hover: #1a5c30;
+    --accent-dim: rgba(42,122,68,0.12);
+    --text: #192d1e;
+    --text-dim: #4a7555;
+    --danger: #b83232;
+    --danger-dim: rgba(184,50,50,0.1);
+    --success: #2a7a44;
+    --warn: #7a6500;
+    --btn-hover: #d4edda;
+    --shadow: rgba(0,0,0,0.15);
+  }
+
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; height: 100vh; display: flex; flex-direction: column; transition: background 0.2s, color 0.2s; }
+
+  /* ── Header ── */
+  header { display: flex; align-items: center; gap: 10px; padding: 0 16px; height: 52px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .logo { height: 30px; width: 30px; object-fit: contain; border-radius: 4px; display: block; }
+  header h1 { font-size: 17px; font-weight: 700; color: var(--accent); letter-spacing: -0.02em; }
+  header .case-info { color: var(--text-dim); font-size: 11px; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px; }
+  .theme-toggle { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim); cursor: pointer; font-size: 15px; padding: 4px 8px; line-height: 1; margin-left: 8px; transition: border-color 0.15s, color 0.15s; }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
   .layout { display: flex; flex: 1; overflow: hidden; }
 
-  /* Sidebar */
+  /* ── Sidebar ── */
   aside { width: 180px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); padding: 16px 12px; display: flex; flex-direction: column; gap: 8px; }
-  aside .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-top: 8px; margin-bottom: 2px; }
+  aside .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 10px; margin-bottom: 2px; }
   aside .section-label:first-child { margin-top: 0; }
   .btn { display: block; width: 100%; padding: 8px 12px; background: var(--border); color: var(--text); border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-size: 13px; text-align: left; transition: background 0.15s, border-color 0.15s; }
-  .btn:hover { background: #333654; border-color: var(--accent); }
+  .btn:hover { background: var(--btn-hover); border-color: var(--accent); }
   .btn.primary { background: var(--accent); color: #fff; }
-  .btn.primary:hover { background: var(--accent-hover); }
+  .btn.primary:hover { background: var(--accent-hover); border-color: transparent; }
   .btn.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
-  .btn.danger:hover { background: rgba(224,92,92,0.1); }
+  .btn.danger:hover { background: var(--danger-dim); }
   .btn.small { padding: 4px 8px; font-size: 12px; width: auto; display: inline-block; }
 
-  /* Main */
+  /* ── Main ── */
   main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-  /* Tabs */
-  .tabs { display: flex; gap: 2px; padding: 10px 16px 0; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .tab { padding: 8px 18px; border-radius: 6px 6px 0 0; cursor: pointer; color: var(--text-dim); border: 1px solid transparent; border-bottom: none; font-size: 13px; transition: color 0.15s, background 0.15s; }
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 2px; padding: 10px 16px 0; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap; }
+  .tab { padding: 7px 14px; border-radius: 6px 6px 0 0; cursor: pointer; color: var(--text-dim); border: 1px solid transparent; border-bottom: none; font-size: 12px; transition: color 0.15s, background 0.15s; }
   .tab:hover { color: var(--text); }
-  .tab.active { background: var(--bg); color: var(--accent); border-color: var(--border); border-bottom-color: var(--bg); }
+  .tab.active { background: var(--bg); color: var(--accent); border-color: var(--border); border-bottom-color: var(--bg); font-weight: 600; }
 
-  /* Content */
+  /* ── Content ── */
   .content { flex: 1; overflow: auto; padding: 20px; }
   .content h2 { font-size: 15px; margin-bottom: 14px; color: var(--text-dim); font-weight: 500; }
   .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 
-  /* Table */
+  /* ── Table ── */
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { background: var(--surface); color: var(--text-dim); font-weight: 500; text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  th { background: var(--surface2); color: var(--text-dim); font-weight: 600; text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
   td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  tr:hover td { background: rgba(79,142,247,0.04); }
+  tr:hover td { background: var(--accent-dim); }
   .tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .tag.slack { background: rgba(79,142,247,0.2); color: var(--accent); }
-  .tag.pq { background: rgba(76,175,128,0.2); color: var(--success); }
-  .tag.pv { background: rgba(224,155,61,0.2); color: var(--warn); }
-  .tag.oos { background: rgba(224,92,92,0.15); color: var(--danger); }
-  .tag.line { background: rgba(79,142,247,0.15); color: var(--accent); }
-  .tag.xfmr { background: rgba(224,155,61,0.15); color: var(--warn); }
+  .tag.slack { background: var(--accent-dim); color: var(--accent); }
+  .tag.pq   { background: rgba(76,175,108,0.15); color: var(--success); }
+  .tag.pv   { background: rgba(201,176,48,0.18); color: var(--warn); }
+  .tag.oos  { background: var(--danger-dim); color: var(--danger); }
+  .tag.line { background: var(--accent-dim); color: var(--accent); }
+  .tag.xfmr { background: rgba(201,176,48,0.18); color: var(--warn); }
   .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
-  .status-dot.on { background: var(--success); }
+  .status-dot.on  { background: var(--success); }
   .status-dot.off { background: var(--danger); }
   .actions { display: flex; gap: 4px; }
   .empty-msg { color: var(--text-dim); text-align: center; padding: 40px 0; }
@@ -72,9 +103,9 @@
   .results-card h3 { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; font-weight: 500; }
   .no-results { color: var(--text-dim); text-align: center; padding: 60px 0; }
 
-  /* Modal */
-  dialog { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0; width: 520px; max-width: 95vw; color: var(--text); box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-  dialog::backdrop { background: rgba(0,0,0,0.6); }
+  /* ── Modal ── */
+  dialog { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0; width: 540px; max-width: 95vw; color: var(--text); box-shadow: 0 20px 60px var(--shadow); }
+  dialog::backdrop { background: rgba(0,0,0,0.55); }
   .modal-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
   .modal-header h3 { font-size: 15px; }
   .modal-close { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 20px; line-height: 1; padding: 0 4px; }
@@ -86,23 +117,25 @@
   label { font-size: 12px; color: var(--text-dim); }
   input, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 13px; width: 100%; transition: border-color 0.15s; }
   input:focus, select:focus { outline: none; border-color: var(--accent); }
-  input[type=checkbox] { width: auto; }
+  input[type=checkbox] { width: auto; accent-color: var(--accent); }
   .form-check { display: flex; align-items: center; gap: 8px; }
   .form-check label { color: var(--text); font-size: 13px; }
   .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
 
-  /* Toast */
+  /* ── Toast ── */
   #toast { position: fixed; bottom: 20px; right: 20px; padding: 10px 18px; border-radius: 8px; font-size: 13px; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
   #toast.show { opacity: 1; }
-  #toast.ok { background: var(--success); color: #fff; }
-  #toast.err { background: var(--danger); color: #fff; }
+  #toast.ok  { background: var(--success); color: #fff; }
+  #toast.err { background: var(--danger);  color: #fff; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>⚡ Mantis Power Flow</h1>
+  <img src="/logo.png" class="logo" alt="" onerror="this.style.display='none'">
+  <h1>Mantis Power Flow</h1>
   <span class="case-info" id="caseInfo">No case loaded</span>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" id="themeBtn">☀</button>
 </header>
 
 <div class="layout">
@@ -114,6 +147,7 @@
 
     <span class="section-label">Analysis</span>
     <button class="btn" onclick="solveDC()">Solve DC</button>
+    <button class="btn" onclick="solveNR()">Solve NR</button>
 
     <span class="section-label">Export</span>
     <button class="btn" onclick="exportRaw()">Export RAW</button>
@@ -125,7 +159,11 @@
       <div class="tab" data-tab="branches" onclick="switchTab('branches')">Branches</div>
       <div class="tab" data-tab="generators" onclick="switchTab('generators')">Generators</div>
       <div class="tab" data-tab="loads" onclick="switchTab('loads')">Loads</div>
+      <div class="tab" data-tab="fixed-shunts" onclick="switchTab('fixed-shunts')">Fixed Shunts</div>
+      <div class="tab" data-tab="switched-shunts" onclick="switchTab('switched-shunts')">Sw. Shunts</div>
+      <div class="tab" data-tab="areas-zones" onclick="switchTab('areas-zones')">Areas & Zones</div>
       <div class="tab" data-tab="results" onclick="switchTab('results')">Results</div>
+      <div class="tab" data-tab="log" onclick="switchTab('log')">Log</div>
     </div>
     <div class="content" id="content">
       <div class="empty-msg">Upload a RAW file or create a new case to get started.</div>
@@ -151,6 +189,7 @@
 <script>
 let state = null;         // current Network object
 let dcSolution = null;    // last DC solve result
+let acSolution = null;    // last AC solve result
 let currentTab = 'buses';
 let modalMode = null;     // { type, id } or { type, add: true }
 
@@ -182,12 +221,20 @@ function fmt(v, decimals = 3) {
   return Number(v).toFixed(decimals);
 }
 
+function statusDot(on) {
+  return `<span class="status-dot ${on ? 'on' : 'off'}"></span>`;
+}
+
 // ─── State / Render ──────────────────────────────────────────────────────────
 
 function updateCaseInfo() {
   const el = document.getElementById('caseInfo');
   if (!state) { el.textContent = 'No case loaded'; return; }
-  el.textContent = `${state.case_name} | Sbase: ${state.s_base} MVA | ${state.frequency} Hz | ${state.buses.length} buses, ${state.branches.length} branches`;
+  const s = state;
+  el.textContent = `${s.case_name} | ${s.s_base} MVA | ${s.frequency} Hz | `
+    + `${s.buses.length} buses, ${s.branches.length} branches, `
+    + `${s.generators.length} gens, ${s.loads.length} loads, `
+    + `${(s.fixed_shunts||[]).length} fixed shunts, ${(s.switched_shunts||[]).length} sw. shunts`;
 }
 
 function switchTab(tab) {
@@ -205,12 +252,30 @@ function renderContent() {
     return;
   }
   switch (currentTab) {
-    case 'buses':     el.innerHTML = renderBuses(); break;
-    case 'branches':  el.innerHTML = renderBranches(); break;
-    case 'generators':el.innerHTML = renderGenerators(); break;
-    case 'loads':     el.innerHTML = renderLoads(); break;
-    case 'results':   el.innerHTML = renderResults(); break;
+    case 'buses':           el.innerHTML = renderBuses(); break;
+    case 'branches':        el.innerHTML = renderBranches(); break;
+    case 'generators':      el.innerHTML = renderGenerators(); break;
+    case 'loads':           el.innerHTML = renderLoads(); break;
+    case 'fixed-shunts':    el.innerHTML = renderFixedShunts(); break;
+    case 'switched-shunts': el.innerHTML = renderSwitchedShunts(); break;
+    case 'areas-zones':     el.innerHTML = renderAreasZones(); break;
+    case 'results':         el.innerHTML = renderResults(); break;
+    case 'log':             el.innerHTML = renderLog(); break;
   }
+}
+
+// ─── Log ─────────────────────────────────────────────────────────────────────
+
+function renderLog() {
+  if (!acSolution || !acSolution.log || acSolution.log.length === 0) {
+    return '<div class="no-results">No log available. Run Newton-Raphson to see process messages.</div>';
+  }
+  const logEntries = acSolution.log.map(entry => `<p style="margin-bottom: 4px; color: var(--text-dim);">${entry}</p>`).join('');
+  return `
+    <div style="font-family: 'Cascadia Code', monospace; font-size: 12px; white-space: pre-wrap; background: var(--surface2); padding: 15px; border-radius: 8px;">
+      <h2>Power Flow Log</h2>
+      ${logEntries}
+    </div>`;
 }
 
 // ─── Buses ───────────────────────────────────────────────────────────────────
@@ -229,7 +294,7 @@ function renderBuses() {
       <td>${fmt(b.nom_voltage, 1)} kV</td>
       <td>${fmt(b.voltage, 4)}</td>
       <td>${fmt(b.angle, 4)}°</td>
-      <td><span class="status-dot ${b.bus_status ? 'on' : 'off'}"></span></td>
+      <td>${statusDot(b.bus_status)}</td>
       <td class="actions">
         <button class="btn small" onclick="openEdit('bus', ${b.bus_id})">Edit</button>
         <button class="btn small danger" onclick="deleteBus(${b.bus_id})">Del</button>
@@ -258,7 +323,7 @@ function renderBranches() {
       <td>${fmt(b.reactance, 5)}</td>
       <td>${fmt(b.tap_ratio, 4)}</td>
       <td>${fmt(b.operating_limit, 0)} MW</td>
-      <td><span class="status-dot ${b.branch_status ? 'on' : 'off'}"></span></td>
+      <td>${statusDot(b.branch_status)}</td>
       <td class="actions">
         <button class="btn small" onclick="openEdit('branch', ${b.id})">Edit</button>
         <button class="btn small danger" onclick="deleteBranch(${b.id})">Del</button>
@@ -287,7 +352,7 @@ function renderGenerators() {
       <td>${fmt(g.q_gen, 1)} MVAR</td>
       <td>${fmt(g.v_setpoint, 4)}</td>
       <td>${fmt(g.p_min, 0)} / ${fmt(g.p_max, 0)}</td>
-      <td><span class="status-dot ${g.gen_status ? 'on' : 'off'}"></span></td>
+      <td>${statusDot(g.gen_status)}</td>
       <td class="actions">
         <button class="btn small" onclick="openEdit('generator', ${g.gen_id})">Edit</button>
         <button class="btn small danger" onclick="deleteGenerator(${g.gen_id})">Del</button>
@@ -330,41 +395,198 @@ function renderLoads() {
     </table>`;
 }
 
-// ─── Results ─────────────────────────────────────────────────────────────────
+// ─── Fixed Shunts ────────────────────────────────────────────────────────────
 
-function renderResults() {
-  if (!dcSolution) {
-    return '<div class="no-results">No DC solution yet. Click <strong>Solve DC</strong> in the sidebar.</div>';
-  }
-  const angles = Object.entries(dcSolution.bus_angles)
-    .sort((a, b) => Number(a[0]) - Number(b[0]))
-    .map(([id, ang]) => `<tr><td>${id}</td><td>${fmt(ang, 4)}°</td></tr>`).join('');
+function renderFixedShunts() {
+  const shunts = state.fixed_shunts || [];
+  const rows = shunts.map((s, idx) => `
+    <tr>
+      <td>${idx}</td>
+      <td>${s.bus_id}</td>
+      <td>${s.shunt_id}</td>
+      <td>${fmt(s.gl, 3)} MW</td>
+      <td>${fmt(s.bl, 3)} MVAR</td>
+      <td>${statusDot(s.status)}</td>
+      <td class="actions">
+        <button class="btn small" onclick="openEdit('fixed_shunt', ${idx})">Edit</button>
+        <button class="btn small danger" onclick="deleteFixedShunt(${idx})">Del</button>
+      </td>
+    </tr>`).join('');
+  return `
+    <div class="toolbar">
+      <h2>Fixed Shunts (${shunts.length})</h2>
+      <button class="btn small primary" onclick="openAdd('fixed_shunt')">+ Add</button>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Bus</th><th>ID</th><th>GL (MW)</th><th>BL (MVAR)</th><th>In Svc</th><th>Actions</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="7" class="empty-msg">No fixed shunts</td></tr>'}</tbody>
+    </table>`;
+}
 
-  const flows = Object.entries(dcSolution.branch_flows)
-    .sort((a, b) => Number(a[0]) - Number(b[0]))
-    .map(([id, mw]) => {
-      const branch = state.branches.find(b => b.id === Number(id));
-      const label = branch ? `${branch.from_bus}→${branch.to_bus}` : id;
-      return `<tr><td>${id}</td><td>${label}</td><td>${fmt(mw, 2)} MW</td></tr>`;
-    }).join('');
+// ─── Switched Shunts ─────────────────────────────────────────────────────────
+
+const MODSW_LABELS = ['Fixed', 'Discrete', 'Continuous', 'Fixed-step', '4', 'Reactive I', 'Admittance'];
+
+function renderSwitchedShunts() {
+  const shunts = state.switched_shunts || [];
+  const rows = shunts.map((s, idx) => {
+    const bTotal = (s.steps || []).reduce((sum, [n, b]) => sum + n * b, 0);
+    return `
+    <tr>
+      <td>${idx}</td>
+      <td>${s.bus_id}</td>
+      <td>${MODSW_LABELS[s.modsw] || s.modsw}</td>
+      <td>${statusDot(s.status)}</td>
+      <td>${fmt(s.v_lo, 4)}</td>
+      <td>${fmt(s.v_hi, 4)}</td>
+      <td>${fmt(s.b_init, 4)}</td>
+      <td>${(s.steps||[]).length} (${fmt(bTotal,3)} pu total)</td>
+      <td class="actions">
+        <button class="btn small" onclick="openEdit('switched_shunt', ${idx})">Edit</button>
+        <button class="btn small danger" onclick="deleteSwitchedShunt(${idx})">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="toolbar">
+      <h2>Switched Shunts (${shunts.length})</h2>
+      <button class="btn small primary" onclick="openAdd('switched_shunt')">+ Add</button>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Bus</th><th>Mode</th><th>In Svc</th><th>V lo</th><th>V hi</th><th>B init</th><th>Banks</th><th>Actions</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="9" class="empty-msg">No switched shunts</td></tr>'}</tbody>
+    </table>`;
+}
+
+// ─── Areas & Zones ───────────────────────────────────────────────────────────
+
+function renderAreasZones() {
+  const areas = state.areas || [];
+  const zones = state.zones || [];
+
+  const areaRows = areas.map(a => `
+    <tr>
+      <td>${a.area_id}</td>
+      <td>${a.area_name}</td>
+      <td>${a.slack_bus}</td>
+      <td>${fmt(a.p_desired, 1)} MW</td>
+      <td>${fmt(a.p_tolerance, 1)} MW</td>
+      <td class="actions">
+        <button class="btn small" onclick="openEdit('area', ${a.area_id})">Edit</button>
+        <button class="btn small danger" onclick="deleteArea(${a.area_id})">Del</button>
+      </td>
+    </tr>`).join('');
+
+  const zoneRows = zones.map(z => `
+    <tr>
+      <td>${z.zone_id}</td>
+      <td>${z.zone_name}</td>
+      <td class="actions">
+        <button class="btn small" onclick="openEdit('zone', ${z.zone_id})">Edit</button>
+        <button class="btn small danger" onclick="deleteZone(${z.zone_id})">Del</button>
+      </td>
+    </tr>`).join('');
 
   return `
     <div class="results-grid">
       <div class="results-card">
-        <h3>Bus Voltage Angles</h3>
+        <div class="toolbar" style="margin-bottom:12px">
+          <h3 style="color:var(--text);font-size:14px;font-weight:500">Areas (${areas.length})</h3>
+          <button class="btn small primary" onclick="openAdd('area')">+ Add</button>
+        </div>
         <table>
-          <thead><tr><th>Bus ID</th><th>Angle (deg)</th></tr></thead>
-          <tbody>${angles}</tbody>
+          <thead><tr><th>ID</th><th>Name</th><th>Slack Bus</th><th>P desired</th><th>P tol</th><th>Actions</th></tr></thead>
+          <tbody>${areaRows || '<tr><td colspan="6" class="empty-msg">No areas</td></tr>'}</tbody>
         </table>
       </div>
       <div class="results-card">
-        <h3>Branch MW Flows</h3>
+        <div class="toolbar" style="margin-bottom:12px">
+          <h3 style="color:var(--text);font-size:14px;font-weight:500">Zones (${zones.length})</h3>
+          <button class="btn small primary" onclick="openAdd('zone')">+ Add</button>
+        </div>
         <table>
-          <thead><tr><th>Branch ID</th><th>From→To</th><th>Flow</th></tr></thead>
-          <tbody>${flows}</tbody>
+          <thead><tr><th>ID</th><th>Name</th><th>Actions</th></tr></thead>
+          <tbody>${zoneRows || '<tr><td colspan="3" class="empty-msg">No zones</td></tr>'}</tbody>
         </table>
       </div>
     </div>`;
+}
+
+// ─── Results ─────────────────────────────────────────────────────────────────
+
+function renderResults() {
+  let solutionData = null;
+  let solutionType = '';
+
+  if (acSolution) {
+    solutionData = acSolution;
+    solutionType = 'AC';
+  } else if (dcSolution) {
+    solutionData = dcSolution;
+    solutionType = 'DC';
+  }
+
+  if (!solutionData) {
+    return '<div class="no-results">No power flow solution yet. Click <strong>Solve DC</strong> or <strong>Solve NR</strong> in the sidebar.</div>';
+  }
+
+  if (solutionType === 'AC') {
+    const voltages = Object.entries(solutionData.bus_voltages)
+      .sort((a, b) => Number(a[0]) - Number(b[0]))
+      .map(([id, v]) => `<tr><td>${id}</td><td>${fmt(v, 4)}</td></tr>`).join('');
+
+    const angles = Object.entries(solutionData.bus_angles)
+      .sort((a, b) => Number(a[0]) - Number(b[0]))
+      .map(([id, ang]) => `<tr><td>${id}</td><td>${fmt(ang, 4)}°</td></tr>`).join('');
+
+    return `
+      <div class="results-grid">
+        <div class="results-card">
+          <h3>Bus Voltage Magnitudes (AC Solution)</h3>
+          <table>
+            <thead><tr><th>Bus ID</th><th>|V| (pu)</th></tr></thead>
+            <tbody>${voltages}</tbody>
+          </table>
+        </div>
+        <div class="results-card">
+          <h3>Bus Voltage Angles (AC Solution)</h3>
+          <table>
+            <thead><tr><th>Bus ID</th><th>Angle (deg)</th></tr></thead>
+            <tbody>${angles}</tbody>
+          </table>
+        </div>
+      </div>`;
+  } else { // DC Solution
+    const angles = Object.entries(solutionData.bus_angles)
+      .sort((a, b) => Number(a[0]) - Number(b[0]))
+      .map(([id, ang]) => `<tr><td>${id}</td><td>${fmt(ang, 4)}°</td></tr>`).join('');
+
+    const flows = Object.entries(solutionData.branch_flows)
+      .sort((a, b) => Number(a[0]) - Number(b[0]))
+      .map(([id, mw]) => {
+        const branch = state.branches.find(b => b.id === Number(id));
+        const label = branch ? `${branch.from_bus}→${branch.to_bus}` : id;
+        return `<tr><td>${id}</td><td>${label}</td><td>${fmt(mw, 2)} MW</td></tr>`;
+      }).join('');
+
+    return `
+      <div class="results-grid">
+        <div class="results-card">
+          <h3>Bus Voltage Angles (DC Solution)</h3>
+          <table>
+            <thead><tr><th>Bus ID</th><th>Angle (deg)</th></tr></thead>
+            <tbody>${angles}</tbody>
+          </table>
+        </div>
+        <div class="results-card">
+          <h3>Branch MW Flows (DC Solution)</h3>
+          <table>
+            <thead><tr><th>Branch ID</th><th>From→To</th><th>Flow</th></tr></thead>
+            <tbody>${flows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }
 }
 
 // ─── Upload / New Case ───────────────────────────────────────────────────────
@@ -380,10 +602,10 @@ async function uploadFile(event) {
   fd.append('file', file);
   const res = await fetch('/api/upload', { method: 'POST', body: fd });
   const data = await res.json();
-  if (res.ok) {
-    state = data;
-    dcSolution = null;
-    updateCaseInfo();
+      if (res.ok) {
+          state = data;
+          dcSolution = null;
+          acSolution = null;    updateCaseInfo();
     renderContent();
     toast(`Loaded: ${state.case_name}`);
   } else {
@@ -401,6 +623,7 @@ async function promptNewCase() {
   if (r.ok) {
     state = r.data;
     dcSolution = null;
+    acSolution = null;
     updateCaseInfo();
     renderContent();
     toast(`Created: ${state.case_name}`);
@@ -421,6 +644,19 @@ async function solveDC() {
     else renderContent();
   } else {
     toast(r.data.error || 'DC solve failed', 'err');
+  }
+}
+
+async function solveNR() {
+  if (!state) { toast('Load a case first', 'err'); return; }
+  const r = await api('POST', '/api/solve/nr');
+  if (r.ok) {
+    acSolution = r.data;
+    toast('Newton-Raphson solve complete');
+    if (currentTab !== 'results') switchTab('results');
+    else renderContent();
+  } else {
+    toast(r.data.error || 'Newton-Raphson solve failed', 'err');
   }
 }
 
@@ -459,6 +695,34 @@ async function deleteLoad(id) {
   else toast(r.data.error || 'Delete failed', 'err');
 }
 
+async function deleteFixedShunt(idx) {
+  if (!confirm(`Delete fixed shunt #${idx}?`)) return;
+  const r = await api('DELETE', `/api/fixed-shunts/${idx}`);
+  if (r.ok) { await refreshNetwork(); toast('Fixed shunt deleted'); }
+  else toast(r.data.error || 'Delete failed', 'err');
+}
+
+async function deleteSwitchedShunt(idx) {
+  if (!confirm(`Delete switched shunt #${idx}?`)) return;
+  const r = await api('DELETE', `/api/switched-shunts/${idx}`);
+  if (r.ok) { await refreshNetwork(); toast('Switched shunt deleted'); }
+  else toast(r.data.error || 'Delete failed', 'err');
+}
+
+async function deleteArea(id) {
+  if (!confirm(`Delete area ${id}?`)) return;
+  const r = await api('DELETE', `/api/areas/${id}`);
+  if (r.ok) { await refreshNetwork(); toast(`Area ${id} deleted`); }
+  else toast(r.data.error || 'Delete failed', 'err');
+}
+
+async function deleteZone(id) {
+  if (!confirm(`Delete zone ${id}?`)) return;
+  const r = await api('DELETE', `/api/zones/${id}`);
+  if (r.ok) { await refreshNetwork(); toast(`Zone ${id} deleted`); }
+  else toast(r.data.error || 'Delete failed', 'err');
+}
+
 async function refreshNetwork() {
   const r = await api('GET', '/api/network');
   if (r.ok) { state = r.data; updateCaseInfo(); renderContent(); }
@@ -469,14 +733,18 @@ async function refreshNetwork() {
 function openEdit(type, id) {
   let item;
   switch (type) {
-    case 'bus':       item = state.buses.find(b => b.bus_id === id); break;
-    case 'branch':    item = state.branches.find(b => b.id === id); break;
-    case 'generator': item = state.generators.find(g => g.gen_id === id); break;
-    case 'load':      item = state.loads.find(l => l.load_id === id); break;
+    case 'bus':            item = state.buses.find(b => b.bus_id === id); break;
+    case 'branch':         item = state.branches.find(b => b.id === id); break;
+    case 'generator':      item = state.generators.find(g => g.gen_id === id); break;
+    case 'load':           item = state.loads.find(l => l.load_id === id); break;
+    case 'fixed_shunt':    item = (state.fixed_shunts || [])[id]; break;
+    case 'switched_shunt': item = (state.switched_shunts || [])[id]; break;
+    case 'area':           item = (state.areas || []).find(a => a.area_id === id); break;
+    case 'zone':           item = (state.zones || []).find(z => z.zone_id === id); break;
   }
   if (!item) return;
   modalMode = { type, id, add: false };
-  document.getElementById('modalTitle').textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+  document.getElementById('modalTitle').textContent = `Edit ${type.replace('_', ' ')}`;
   document.getElementById('modalBody').innerHTML = buildForm(type, item);
   document.getElementById('modal').showModal();
 }
@@ -484,12 +752,16 @@ function openEdit(type, id) {
 function openAdd(type) {
   modalMode = { type, id: null, add: true };
   const defaults = {
-    bus: { bus_id: 0, bus_name: 'New Bus', bus_type: 'PQ', nom_voltage: 138.0, bus_status: true, voltage: 1.0, angle: 0.0, real_shunt: 0.0, imag_shunt: 0.0, v_min_operating: 0.9, v_min_contingency: 0.9, v_max_operating: 1.1, v_max_contingency: 1.1 },
-    branch: { id: 0, from_bus: 1, to_bus: 2, branch_type: 'Line', branch_name: '', branch_status: true, resistance: 0.01, reactance: 0.1, tap_ratio: 1.0, phase_shift: 0.0, operating_limit: 0.0, contingency_limit: 0.0, from_shunt_conductance: 0.0, from_shunt_susceptance: 0.0, to_shunt_conductance: 0.0, to_shunt_susceptance: 0.0 },
-    generator: { gen_id: 0, gen_bus_id: 1, gen_name: 'New Gen', gen_status: true, p_gen: 0.0, q_gen: 0.0, v_setpoint: 1.0, p_min: 0.0, p_max: 100.0, q_min: -50.0, q_max: 50.0 },
-    load: { load_id: 0, bus_id: 1, load_name: 'New Load', real_load: 0.0, imag_load: 0.0 },
+    bus:            { bus_id: 0, bus_name: 'New Bus', bus_type: 'PQ', nom_voltage: 138.0, bus_status: true, voltage: 1.0, angle: 0.0, real_shunt: 0.0, imag_shunt: 0.0, v_min_operating: 0.9, v_min_contingency: 0.9, v_max_operating: 1.1, v_max_contingency: 1.1 },
+    branch:         { id: 0, from_bus: 1, to_bus: 2, branch_type: 'Line', branch_name: '', branch_status: true, resistance: 0.01, reactance: 0.1, tap_ratio: 1.0, phase_shift: 0.0, operating_limit: 0.0, contingency_limit: 0.0, from_shunt_conductance: 0.0, from_shunt_susceptance: 0.0, to_shunt_conductance: 0.0, to_shunt_susceptance: 0.0 },
+    generator:      { gen_id: 0, gen_bus_id: 1, gen_name: 'New Gen', gen_status: true, p_gen: 0.0, q_gen: 0.0, v_setpoint: 1.0, p_min: 0.0, p_max: 100.0, q_min: -50.0, q_max: 50.0 },
+    load:           { load_id: 0, bus_id: 1, load_name: 'New Load', real_load: 0.0, imag_load: 0.0 },
+    fixed_shunt:    { bus_id: 1, shunt_id: '1', status: true, gl: 0.0, bl: 0.0 },
+    switched_shunt: { bus_id: 1, modsw: 1, status: true, v_hi: 1.05, v_lo: 0.95, remote_bus: 0, b_init: 0.0, steps: [] },
+    area:           { area_id: 0, area_name: 'New Area', slack_bus: 0, p_desired: 0.0, p_tolerance: 10.0 },
+    zone:           { zone_id: 0, zone_name: 'New Zone' },
   };
-  document.getElementById('modalTitle').textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+  document.getElementById('modalTitle').textContent = `Add ${type.replace('_', ' ')}`;
   document.getElementById('modalBody').innerHTML = buildForm(type, defaults[type]);
   document.getElementById('modal').showModal();
 }
@@ -522,6 +794,7 @@ function buildForm(type, item) {
           <label for="f_bus_status">In Service</label>
         </div>
       </div>`;
+
     case 'branch': return `
       <div class="form-grid">
         <div class="form-group"><label>ID</label><input type="number" id="f_id" value="${item.id}" readonly></div>
@@ -543,6 +816,7 @@ function buildForm(type, item) {
           <label for="f_branch_status">In Service</label>
         </div>
       </div>`;
+
     case 'generator': return `
       <div class="form-grid">
         <div class="form-group"><label>ID</label><input type="number" id="f_gen_id" value="${item.gen_id}" readonly></div>
@@ -560,6 +834,7 @@ function buildForm(type, item) {
           <label for="f_gen_status">In Service</label>
         </div>
       </div>`;
+
     case 'load': return `
       <div class="form-grid">
         <div class="form-group"><label>ID</label><input type="number" id="f_load_id" value="${item.load_id}" readonly></div>
@@ -568,6 +843,65 @@ function buildForm(type, item) {
         <div class="form-group"><label>P load (MW)</label><input type="number" id="f_real_load" step="any" value="${item.real_load}"></div>
         <div class="form-group"><label>Q load (MVAR)</label><input type="number" id="f_imag_load" step="any" value="${item.imag_load}"></div>
       </div>`;
+
+    case 'fixed_shunt': return `
+      <div class="form-grid">
+        <div class="form-group"><label>Bus ID</label><input type="number" id="f_bus_id" value="${item.bus_id}"></div>
+        <div class="form-group"><label>Shunt ID</label><input type="text" id="f_shunt_id" value="${item.shunt_id}"></div>
+        <div class="form-group"><label>GL (MW at 1 pu)</label><input type="number" id="f_gl" step="any" value="${item.gl}"></div>
+        <div class="form-group"><label>BL (MVAR at 1 pu)</label><input type="number" id="f_bl" step="any" value="${item.bl}"></div>
+        <div class="form-group full form-check">
+          <input type="checkbox" id="f_status" ${item.status?'checked':''}>
+          <label for="f_status">In Service</label>
+        </div>
+      </div>`;
+
+    case 'switched_shunt': {
+      const steps = item.steps || [];
+      let stepsHtml = '';
+      for (let i = 0; i < 8; i++) {
+        const n = steps[i] !== undefined ? steps[i][0] : '';
+        const b = steps[i] !== undefined ? steps[i][1] : '';
+        stepsHtml += `
+          <div class="form-group"><label>N${i+1}</label><input type="number" id="f_sn_${i}" value="${n}" placeholder="0"></div>
+          <div class="form-group"><label>B${i+1} (pu)</label><input type="number" id="f_sb_${i}" step="any" value="${b}" placeholder="0.0"></div>`;
+      }
+      return `
+        <div class="form-grid">
+          <div class="form-group"><label>Bus ID</label><input type="number" id="f_bus_id" value="${item.bus_id}"></div>
+          <div class="form-group"><label>Mode (MODSW)</label>
+            <select id="f_modsw">
+              ${[0,1,2,3,5,6].map(m => `<option value="${m}"${item.modsw===m?' selected':''}>${m} – ${MODSW_LABELS[m]}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group"><label>V lo (pu)</label><input type="number" id="f_v_lo" step="any" value="${item.v_lo}"></div>
+          <div class="form-group"><label>V hi (pu)</label><input type="number" id="f_v_hi" step="any" value="${item.v_hi}"></div>
+          <div class="form-group"><label>Remote Bus</label><input type="number" id="f_remote_bus" value="${item.remote_bus}"></div>
+          <div class="form-group"><label>B init (pu)</label><input type="number" id="f_b_init" step="any" value="${item.b_init}"></div>
+          <div class="form-group full form-check">
+            <input type="checkbox" id="f_status" ${item.status?'checked':''}>
+            <label for="f_status">In Service</label>
+          </div>
+          <div class="form-group full"><label style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em">Step Banks — N = count, B = susceptance per step (pu)</label></div>
+          ${stepsHtml}
+        </div>`;
+    }
+
+    case 'area': return `
+      <div class="form-grid">
+        <div class="form-group"><label>Area ID</label><input type="number" id="f_area_id" value="${item.area_id}" readonly></div>
+        <div class="form-group"><label>Slack Bus</label><input type="number" id="f_slack_bus" value="${item.slack_bus}"></div>
+        <div class="form-group full"><label>Name</label><input type="text" id="f_area_name" value="${item.area_name}"></div>
+        <div class="form-group"><label>P desired (MW)</label><input type="number" id="f_p_desired" step="any" value="${item.p_desired}"></div>
+        <div class="form-group"><label>P tolerance (MW)</label><input type="number" id="f_p_tolerance" step="any" value="${item.p_tolerance}"></div>
+      </div>`;
+
+    case 'zone': return `
+      <div class="form-grid">
+        <div class="form-group"><label>Zone ID</label><input type="number" id="f_zone_id" value="${item.zone_id}" readonly></div>
+        <div class="form-group"><label>Name</label><input type="text" id="f_zone_name" value="${item.zone_name}"></div>
+      </div>`;
+
     default: return '';
   }
 }
@@ -607,6 +941,32 @@ function collectForm(type) {
       load_id: g('f_load_id'), bus_id: g('f_bus_id'), load_name: g('f_load_name'),
       real_load: g('f_real_load'), imag_load: g('f_imag_load'),
     };
+    case 'fixed_shunt': return {
+      bus_id: g('f_bus_id'), shunt_id: g('f_shunt_id'),
+      status: g('f_status'), gl: g('f_gl'), bl: g('f_bl'),
+    };
+    case 'switched_shunt': {
+      const steps = [];
+      for (let i = 0; i < 8; i++) {
+        const nEl = document.getElementById(`f_sn_${i}`);
+        const bEl = document.getElementById(`f_sb_${i}`);
+        const n = nEl && nEl.value !== '' ? parseInt(nEl.value) : 0;
+        const b = bEl && bEl.value !== '' ? parseFloat(bEl.value) : 0.0;
+        if (n !== 0) steps.push([n, b]);
+      }
+      return {
+        bus_id: g('f_bus_id'), modsw: parseInt(g('f_modsw')),
+        status: g('f_status'), v_hi: g('f_v_hi'), v_lo: g('f_v_lo'),
+        remote_bus: g('f_remote_bus'), b_init: g('f_b_init'), steps,
+      };
+    }
+    case 'area': return {
+      area_id: g('f_area_id'), area_name: g('f_area_name'),
+      slack_bus: g('f_slack_bus'), p_desired: g('f_p_desired'), p_tolerance: g('f_p_tolerance'),
+    };
+    case 'zone': return {
+      zone_id: g('f_zone_id'), zone_name: g('f_zone_name'),
+    };
     default: return {};
   }
 }
@@ -616,8 +976,11 @@ async function saveModal() {
   const { type, id, add } = modalMode;
   const body = collectForm(type);
 
-  const plural = { bus: 'buses', branch: 'branches', generator: 'generators', load: 'loads' }[type];
-  const idField = { bus: 'bus_id', branch: 'id', generator: 'gen_id', load: 'load_id' }[type];
+  const plural = {
+    bus: 'buses', branch: 'branches', generator: 'generators', load: 'loads',
+    fixed_shunt: 'fixed-shunts', switched_shunt: 'switched-shunts',
+    area: 'areas', zone: 'zones',
+  }[type];
 
   let r;
   if (add) {
@@ -629,15 +992,32 @@ async function saveModal() {
   if (r.ok) {
     closeModal();
     await refreshNetwork();
-    toast(add ? `${type} added` : `${type} updated`);
+    toast(add ? `${type.replace('_',' ')} added` : `${type.replace('_',' ')} updated`);
   } else {
     toast(r.data.error || 'Save failed', 'err');
   }
 }
 
+// ─── Theme ───────────────────────────────────────────────────────────────────
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const isDark = root.getAttribute('data-theme') !== 'light';
+  root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀';
+  localStorage.setItem('mantis-theme', isDark ? 'light' : 'dark');
+}
+
 // ─── Init ────────────────────────────────────────────────────────────────────
 
 (async () => {
+  // Restore saved theme
+  const saved = localStorage.getItem('mantis-theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    document.getElementById('themeBtn').textContent = saved === 'light' ? '🌙' : '☀';
+  }
+
   const r = await api('GET', '/api/network');
   if (r.ok) {
     state = r.data;
