@@ -26,12 +26,12 @@ impl Network {
      * systems and is not appropriate for distribution systems or networks with
      * a low X/R ratio.
      */
-    pub fn dc_approximation(&self) -> Option<DcSolution> {
+    pub fn dc_approximation(&mut self) -> Result<(), String> {
         let n = self.bus_map.len(); // number of non-slack buses
         debug!("Found {:>6} non-slack buses", n);
 
         if n == 0 {
-            return None;
+            return Err("No non-slack buses found.".to_string());
         }
 
         // initialize the admittance matrix
@@ -96,54 +96,20 @@ impl Network {
         let csc = b_prime.to_sprs();
         if let Err(e) = rsparse::lusol(&csc, &mut p, 0, 1e-6) {
             debug!("DC solve failed: {:?}", e);
-            return None;
+            return Err(format!("DC solve failed: {:?}", e));
         }
         // p now contains theta (radians) for each non-slack bus
 
-        // Build bus_angles map (degrees)
-        let mut bus_angles = HashMap::new();
-
-        // Slack buses are at 0.0 degrees
-        for bus in &self.buses {
+        // Update bus angles in the network
+        for bus in &mut self.buses {
             if bus.bus_type == BusType::Slack {
-                bus_angles.insert(bus.bus_id, 0.0);
+                bus.angle = 0.0;
+            } else if let Some(&idx) = self.bus_map.get(&bus.bus_id) {
+                bus.angle = p[idx].to_degrees() as f32;
             }
         }
 
-        // Non-slack buses: look up index in bus_map
-        for bus in &self.buses {
-            if let Some(&idx) = self.bus_map.get(&bus.bus_id) {
-                bus_angles.insert(bus.bus_id, p[idx].to_degrees());
-            }
-        }
-
-        // Compute branch flows (MW)
-        let mut branch_flows = HashMap::new();
-        for branch in &self.branches {
-            if !branch.branch_status || branch.reactance == 0.0 {
-                continue;
-            }
-
-            let theta_i = self
-                .bus_map
-                .get(&branch.from_bus)
-                .map(|&idx| p[idx])
-                .unwrap_or(0.0); // slack bus = 0 radians
-
-            let theta_j = self
-                .bus_map
-                .get(&branch.to_bus)
-                .map(|&idx| p[idx])
-                .unwrap_or(0.0); // slack bus = 0 radians
-
-            let flow = (theta_i - theta_j) / branch.reactance as f64 * self.s_base as f64;
-            branch_flows.insert(branch.id, flow);
-        }
-
-        Some(DcSolution {
-            bus_angles,
-            branch_flows,
-        })
+        Ok(())
     }
     pub fn decoupled(&self) -> Option<AcSolution> {
         Some(AcSolution {
@@ -154,7 +120,7 @@ impl Network {
     }
 
     /// Solves the network using the Newton-Raphson power flow method.
-    pub fn newton_raphson_solution(&self) -> AcSolution {
+    pub fn newton_raphson_solution(&mut self) -> AcSolution {
         let mut log_messages: Vec<String> = Vec::new();
         log_messages.push(format!("Starting Newton-Raphson power flow solution."));
 
@@ -469,6 +435,13 @@ impl Network {
             // Check for convergence
             if max_mismatch < tolerance {
                 log_messages.push(format!("Newton-Raphson converged in {} iterations.", iter + 1));
+                
+                // Update bus voltages and angles in the network
+                for bus in &mut self.buses {
+                    bus.voltage = v[&bus.bus_id] as f32;
+                    bus.angle = delta[&bus.bus_id].to_degrees() as f32;
+                }
+
                 // Prepare and return AcSolution
                 let mut bus_voltages = HashMap::new();
                 let mut bus_angles = HashMap::new();

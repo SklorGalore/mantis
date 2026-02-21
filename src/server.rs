@@ -673,30 +673,36 @@ async fn delete_zone(State(state): State<AppState>, Path(id): Path<usize>) -> Re
 
 // POST /api/solve/dc
 async fn solve_dc(State(state): State<AppState>) -> Response {
-    let guard = state.lock().await;
-    let net = match guard.as_ref() {
+    let mut guard = state.lock().await;
+    let net = match guard.as_mut() {
         Some(n) => n,
         None => return json_err(StatusCode::NOT_FOUND, "No network loaded"),
     };
 
     match net.dc_approximation() {
-        Some(sol) => json_ok(serde_json::to_value(&sol).unwrap_or(json!(null))),
-        None => json_err(
+        Ok(()) => {
+            let net_json = serde_json::to_value(&net).unwrap_or(json!(null));
+            json_ok(net_json)
+        },
+        Err(msg) => json_err(
             StatusCode::UNPROCESSABLE_ENTITY,
-            "DC solve failed (check network has slack bus and non-zero reactances)",
+            &msg,
         ),
     }
 }
 
 // POST /api/solve/nr
 async fn solve_nr(State(state): State<AppState>) -> Response {
-    let guard = state.lock().await;
-    let net = match guard.as_ref() {
+    let mut guard = state.lock().await; // Acquire mutable lock
+    let net = match guard.as_mut() {
         Some(n) => n,
         None => return json_err(StatusCode::NOT_FOUND, "No network loaded"),
     };
 
-    let sol = net.newton_raphson_solution(); // newton_raphson_solution now returns AcSolution directly
+    let sol = net.newton_raphson_solution(); // newton_raphson_solution now returns AcSolution directly and updates `net`
+    // The `sol` object contains the log and the results for frontend display.
+    // The `net` object is also updated in place.
+
     json_ok(serde_json::to_value(&sol).unwrap_or(json!(null)))
 }
 

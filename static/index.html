@@ -162,7 +162,7 @@
       <div class="tab" data-tab="fixed-shunts" onclick="switchTab('fixed-shunts')">Fixed Shunts</div>
       <div class="tab" data-tab="switched-shunts" onclick="switchTab('switched-shunts')">Sw. Shunts</div>
       <div class="tab" data-tab="areas-zones" onclick="switchTab('areas-zones')">Areas & Zones</div>
-      <div class="tab" data-tab="results" onclick="switchTab('results')">Results</div>
+
       <div class="tab" data-tab="log" onclick="switchTab('log')">Log</div>
     </div>
     <div class="content" id="content">
@@ -188,7 +188,6 @@
 
 <script>
 let state = null;         // current Network object
-let dcSolution = null;    // last DC solve result
 let acSolution = null;    // last AC solve result
 let currentTab = 'buses';
 let modalMode = null;     // { type, id } or { type, add: true }
@@ -259,7 +258,7 @@ function renderContent() {
     case 'fixed-shunts':    el.innerHTML = renderFixedShunts(); break;
     case 'switched-shunts': el.innerHTML = renderSwitchedShunts(); break;
     case 'areas-zones':     el.innerHTML = renderAreasZones(); break;
-    case 'results':         el.innerHTML = renderResults(); break;
+
     case 'log':             el.innerHTML = renderLog(); break;
   }
 }
@@ -512,83 +511,6 @@ function renderAreasZones() {
     </div>`;
 }
 
-// ─── Results ─────────────────────────────────────────────────────────────────
-
-function renderResults() {
-  let solutionData = null;
-  let solutionType = '';
-
-  if (acSolution) {
-    solutionData = acSolution;
-    solutionType = 'AC';
-  } else if (dcSolution) {
-    solutionData = dcSolution;
-    solutionType = 'DC';
-  }
-
-  if (!solutionData) {
-    return '<div class="no-results">No power flow solution yet. Click <strong>Solve DC</strong> or <strong>Solve NR</strong> in the sidebar.</div>';
-  }
-
-  if (solutionType === 'AC') {
-    const voltages = Object.entries(solutionData.bus_voltages)
-      .sort((a, b) => Number(a[0]) - Number(b[0]))
-      .map(([id, v]) => `<tr><td>${id}</td><td>${fmt(v, 4)}</td></tr>`).join('');
-
-    const angles = Object.entries(solutionData.bus_angles)
-      .sort((a, b) => Number(a[0]) - Number(b[0]))
-      .map(([id, ang]) => `<tr><td>${id}</td><td>${fmt(ang, 4)}°</td></tr>`).join('');
-
-    return `
-      <div class="results-grid">
-        <div class="results-card">
-          <h3>Bus Voltage Magnitudes (AC Solution)</h3>
-          <table>
-            <thead><tr><th>Bus ID</th><th>|V| (pu)</th></tr></thead>
-            <tbody>${voltages}</tbody>
-          </table>
-        </div>
-        <div class="results-card">
-          <h3>Bus Voltage Angles (AC Solution)</h3>
-          <table>
-            <thead><tr><th>Bus ID</th><th>Angle (deg)</th></tr></thead>
-            <tbody>${angles}</tbody>
-          </table>
-        </div>
-      </div>`;
-  } else { // DC Solution
-    const angles = Object.entries(solutionData.bus_angles)
-      .sort((a, b) => Number(a[0]) - Number(b[0]))
-      .map(([id, ang]) => `<tr><td>${id}</td><td>${fmt(ang, 4)}°</td></tr>`).join('');
-
-    const flows = Object.entries(solutionData.branch_flows)
-      .sort((a, b) => Number(a[0]) - Number(b[0]))
-      .map(([id, mw]) => {
-        const branch = state.branches.find(b => b.id === Number(id));
-        const label = branch ? `${branch.from_bus}→${branch.to_bus}` : id;
-        return `<tr><td>${id}</td><td>${label}</td><td>${fmt(mw, 2)} MW</td></tr>`;
-      }).join('');
-
-    return `
-      <div class="results-grid">
-        <div class="results-card">
-          <h3>Bus Voltage Angles (DC Solution)</h3>
-          <table>
-            <thead><tr><th>Bus ID</th><th>Angle (deg)</th></tr></thead>
-            <tbody>${angles}</tbody>
-          </table>
-        </div>
-        <div class="results-card">
-          <h3>Branch MW Flows (DC Solution)</h3>
-          <table>
-            <thead><tr><th>Branch ID</th><th>From→To</th><th>Flow</th></tr></thead>
-            <tbody>${flows}</tbody>
-          </table>
-        </div>
-      </div>`;
-  }
-}
-
 // ─── Upload / New Case ───────────────────────────────────────────────────────
 
 function triggerUpload() {
@@ -604,7 +526,6 @@ async function uploadFile(event) {
   const data = await res.json();
       if (res.ok) {
           state = data;
-          dcSolution = null;
           acSolution = null;    updateCaseInfo();
     renderContent();
     toast(`Loaded: ${state.case_name}`);
@@ -622,7 +543,6 @@ async function promptNewCase() {
   const r = await api('POST', '/api/network/new', { case_name: name, s_base: sbase, frequency: freq });
   if (r.ok) {
     state = r.data;
-    dcSolution = null;
     acSolution = null;
     updateCaseInfo();
     renderContent();
@@ -636,11 +556,12 @@ async function promptNewCase() {
 
 async function solveDC() {
   if (!state) { toast('Load a case first', 'err'); return; }
-  const r = await api('POST', '/api/solve/dc');
+  const r = await api('POST', '/api/solve/dc'); // This API call now updates the backend's network in place.
   if (r.ok) {
-    dcSolution = r.data;
+    await refreshNetwork(); // Fetch the updated network
     toast('DC solve complete');
-    if (currentTab !== 'results') switchTab('results');
+    // After solving, switch to the buses tab, as solution is applied to the network itself.
+    if (currentTab !== 'buses') switchTab('buses');
     else renderContent();
   } else {
     toast(r.data.error || 'DC solve failed', 'err');
@@ -649,11 +570,14 @@ async function solveDC() {
 
 async function solveNR() {
   if (!state) { toast('Load a case first', 'err'); return; }
-  const r = await api('POST', '/api/solve/nr');
+  const r = await api('POST', '/api/solve/nr'); // This API call now updates the backend's network in place.
   if (r.ok) {
-    acSolution = r.data;
+    // acSolution (global variable) is used by renderLog, so it still needs to be populated.
+    acSolution = r.data; 
+    await refreshNetwork(); // Fetch the updated network
     toast('Newton-Raphson solve complete');
-    if (currentTab !== 'results') switchTab('results');
+    // After solving, switch to the buses tab, as solution is applied to the network itself.
+    if (currentTab !== 'buses') switchTab('buses');
     else renderContent();
   } else {
     toast(r.data.error || 'Newton-Raphson solve failed', 'err');
