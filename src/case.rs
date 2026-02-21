@@ -1,7 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum BusType {
     Slack, // slack, swing, Vd, reference bus
     PQ,    // load bus
@@ -20,7 +21,7 @@ impl fmt::Display for BusType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Bus {
     // Identifiers
     pub bus_id: usize,
@@ -73,8 +74,10 @@ impl fmt::Display for Bus {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Load {
     pub load_id: usize,
+    pub bus_id: usize,
     pub load_name: String,
 
     pub real_load: f32,
@@ -82,9 +85,16 @@ pub struct Load {
 }
 
 impl Load {
-    pub fn new(load_id: usize, load_name: String, real_load: f32, imag_load: f32) -> Self {
+    pub fn new(
+        load_id: usize,
+        bus_id: usize,
+        load_name: String,
+        real_load: f32,
+        imag_load: f32,
+    ) -> Self {
         Self {
             load_id,
+            bus_id,
             load_name,
             real_load,
             imag_load,
@@ -102,6 +112,7 @@ impl fmt::Display for Load {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum BranchType {
     Line,
     TwoWinding,
@@ -116,6 +127,7 @@ impl fmt::Display for BranchType {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Branch {
     // Identifiers
     pub branch_type: BranchType,
@@ -191,7 +203,7 @@ impl fmt::Display for Branch {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Generator {
     // Identifiers
     pub gen_id: usize,
@@ -239,6 +251,7 @@ impl fmt::Display for Generator {
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Network {
     pub case_name: String,
     pub s_base: f32,
@@ -248,6 +261,7 @@ pub struct Network {
     pub branches: Vec<Branch>,
     pub loads: Vec<Load>,
     pub generators: Vec<Generator>,
+    #[serde(skip)]
     pub bus_map: HashMap<usize, usize>, // bus_id -> matrix index (slack excluded)
 }
 
@@ -303,6 +317,18 @@ impl Network {
             loads: Vec::new(),
             generators: Vec::new(),
             bus_map: HashMap::new(),
+        }
+    }
+
+    /// Rebuild bus_map from current buses list (must be called after any bus change)
+    pub fn rebuild_bus_map(&mut self) {
+        self.bus_map.clear();
+        let mut matrix_idx: usize = 0;
+        for bus in &self.buses {
+            if bus.bus_type != BusType::Slack {
+                self.bus_map.insert(bus.bus_id, matrix_idx);
+                matrix_idx += 1;
+            }
         }
     }
 }

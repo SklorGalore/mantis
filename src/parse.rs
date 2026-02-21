@@ -19,13 +19,21 @@ pub fn read_case_v33(path: &str) -> Network {
             std::process::exit(1);
         }
     };
-    let lines: Vec<String> = io::BufReader::new(file)
+    let content: String = io::BufReader::new(file)
         .lines()
         .map_while(Result::ok)
-        .collect();
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    parse_raw_str(&content)
+}
+
+/// Parses a PSS/E v33 RAW string into a Network.
+pub fn parse_raw_str(content: &str) -> Network {
+    let lines: Vec<&str> = content.lines().collect();
 
     // Parse header line (line 1): IC, SBASE, REV, XFRRAT, NXFRAT, BASFRQ / comment
-    let header = &lines[0];
+    let header = lines[0];
     let header_data = header.split('/').next().unwrap_or(header);
     let header_fields: Vec<&str> = header_data.split(',').collect();
 
@@ -58,13 +66,13 @@ pub fn read_case_v33(path: &str) -> Network {
     // skip 3 header lines
     let mut line_number = 3;
 
-    // Branch, generator, and load ids should start at 1.
+    // Branch, generator, and load ids should start at 0.
     let mut branch_index: usize = 0;
     let mut gen_index: usize = 0;
     let mut load_index: usize = 0;
 
     'lineloop: while line_number < lines.len() {
-        let line = &lines[line_number];
+        let line = lines[line_number];
         let trimmed = line.trim();
 
         // Check for end of file
@@ -73,7 +81,7 @@ pub fn read_case_v33(path: &str) -> Network {
         }
 
         // Proceed to the next section (delimiter lines are "0 / ..." or "0 /...")
-        if trimmed == "0" || trimmed.starts_with("0 /") || trimmed.starts_with("0 /") {
+        if trimmed == "0" || trimmed.starts_with("0 /") || trimmed.starts_with("0/") {
             section = match section {
                 Section::Bus => Section::Load,
                 Section::Load => Section::FixedShunt,
@@ -159,6 +167,7 @@ pub fn read_case_v33(path: &str) -> Network {
                     if status == 1 {
                         network.loads.push(Load {
                             load_id: load_index,
+                            bus_id,
                             load_name: format!("Bus{}-{}", bus_id, name),
                             real_load: pl,
                             imag_load: ql,
@@ -210,12 +219,12 @@ pub fn read_case_v33(path: &str) -> Network {
                 if fields.len() >= 14 {
                     let from_bus: usize = fields[0].trim().parse().unwrap_or(0);
                     let to_bus: usize = fields[1].trim().parse().unwrap_or(0);
-                    // let name = strip_extras(fields[2]);
-                    let r: f32 = fields[2].trim().parse().unwrap_or(0.0);
-                    let x: f32 = fields[3].trim().parse().unwrap_or(0.0);
-                    let b: f32 = fields[4].trim().parse().unwrap_or(0.0);
-                    let rate_a: f32 = fields[5].trim().parse().unwrap_or(0.0);
-                    let rate_b: f32 = fields[6].trim().parse().unwrap_or(0.0);
+                    // fields[2] = 'CKT' (circuit identifier, skip)
+                    let r: f32 = fields[3].trim().parse().unwrap_or(0.0);
+                    let x: f32 = fields[4].trim().parse().unwrap_or(0.0);
+                    let b: f32 = fields[5].trim().parse().unwrap_or(0.0);
+                    let rate_a: f32 = fields[6].trim().parse().unwrap_or(0.0);
+                    let rate_b: f32 = fields[7].trim().parse().unwrap_or(0.0);
                     let gi: f32 = fields[9].trim().parse().unwrap_or(0.0);
                     let bi: f32 = fields[10].trim().parse().unwrap_or(0.0);
                     let gj: f32 = fields[11].trim().parse().unwrap_or(0.0);
@@ -346,13 +355,7 @@ pub fn read_case_v33(path: &str) -> Network {
     }
 
     // Build bus_map: bus_id -> matrix index (excluding slack)
-    let mut matrix_idx: usize = 0;
-    for bus in &network.buses {
-        if bus.bus_type != BusType::Slack {
-            network.bus_map.insert(bus.bus_id, matrix_idx);
-            matrix_idx += 1;
-        }
-    }
+    network.rebuild_bus_map();
 
     info!(
         "Parsed {} buses, {} loads, {} generators, {} branches",
