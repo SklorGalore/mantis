@@ -20,7 +20,9 @@ impl Network {
         b_prime.n = n;
 
         // Collect OUT bus IDs for quick lookup
-        let out_buses: std::collections::HashSet<usize> = self.buses.iter()
+        let out_buses: std::collections::HashSet<usize> = self
+            .buses
+            .iter()
             .filter(|b| b.bus_type == BusType::OUT)
             .map(|b| b.bus_id)
             .collect();
@@ -64,10 +66,10 @@ impl Network {
         let mut p = vec![0.0f64; n];
 
         for generator in &self.generators {
-            if generator.gen_status {
-                if let Some(&idx) = self.bus_map.get(&generator.gen_bus_id) {
-                    p[idx] += generator.p_gen as f64 / self.s_base as f64;
-                }
+            if generator.gen_status
+                && let Some(&idx) = self.bus_map.get(&generator.gen_bus_id)
+            {
+                p[idx] += generator.p_gen as f64 / self.s_base as f64;
             }
         }
 
@@ -99,8 +101,10 @@ impl Network {
 
         // Compute and write branch flows (MW) directly into branch structs
         for branch in &mut self.branches {
-            if !branch.branch_status || branch.reactance == 0.0
-                || out_buses.contains(&branch.from_bus) || out_buses.contains(&branch.to_bus)
+            if !branch.branch_status
+                || branch.reactance == 0.0
+                || out_buses.contains(&branch.from_bus)
+                || out_buses.contains(&branch.to_bus)
             {
                 branch.flow = 0.0;
                 continue;
@@ -118,28 +122,39 @@ impl Network {
                 .map(|&idx| p[idx])
                 .unwrap_or(0.0);
 
-            branch.flow = ((theta_i - theta_j) / branch.reactance as f64 * self.s_base as f64) as f32;
+            branch.flow =
+                ((theta_i - theta_j) / branch.reactance as f64 * self.s_base as f64) as f32;
         }
 
         // Back-calculate slack bus generator output from branch flows
         // Slack P_gen = P_load_at_slack + sum(flows leaving slack)
-        let slack_ids: Vec<usize> = self.buses.iter()
+        let slack_ids: Vec<usize> = self
+            .buses
+            .iter()
             .filter(|b| b.bus_type == BusType::Slack)
             .map(|b| b.bus_id)
             .collect();
 
         for &slack_id in &slack_ids {
-            let p_load: f32 = self.loads.iter()
+            let p_load: f32 = self
+                .loads
+                .iter()
                 .filter(|l| l.bus_id == slack_id)
                 .map(|l| l.real_load)
                 .sum();
 
-            let p_flow_out: f32 = self.branches.iter()
+            let p_flow_out: f32 = self
+                .branches
+                .iter()
                 .filter(|br| br.branch_status)
                 .map(|br| {
-                    if br.from_bus == slack_id { br.flow }
-                    else if br.to_bus == slack_id { -br.flow }
-                    else { 0.0 }
+                    if br.from_bus == slack_id {
+                        br.flow
+                    } else if br.to_bus == slack_id {
+                        -br.flow
+                    } else {
+                        0.0
+                    }
                 })
                 .sum();
 
@@ -147,14 +162,17 @@ impl Network {
             let p_required = p_load + p_flow_out;
 
             // Sum of other (non-first) generators on this bus
-            let slack_gens: Vec<usize> = self.generators.iter()
+            let slack_gens: Vec<usize> = self
+                .generators
+                .iter()
                 .enumerate()
                 .filter(|(_, g)| g.gen_bus_id == slack_id && g.gen_status)
                 .map(|(i, _)| i)
                 .collect();
 
             if let Some(&first) = slack_gens.first() {
-                let other_gen: f32 = slack_gens.iter()
+                let other_gen: f32 = slack_gens
+                    .iter()
                     .skip(1)
                     .map(|&i| self.generators[i].p_gen)
                     .sum();
