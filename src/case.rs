@@ -2,25 +2,28 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
+/// Bus type enum.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum BusType {
     Slack, // slack, swing, Vd, reference bus
     PQ,    // load bus
     PV,    // generator bus
-    OOS,   // out of service
+    OUT,   // out of service
 }
 
+/// Display the bus type as a string.
 impl fmt::Display for BusType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             BusType::Slack => write!(f, "REF"),
             BusType::PQ => write!(f, "P-Q"),
             BusType::PV => write!(f, "P-V"),
-            BusType::OOS => write!(f, "OOS"),
+            BusType::OUT => write!(f, "OOS"),
         }
     }
 }
 
+/// Bus struct with the necessary fields for a power system bus.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Bus {
     // Identifiers
@@ -44,12 +47,14 @@ pub struct Bus {
     pub v_max_operating: f32,
     pub v_max_contingency: f32,
 }
+
+/// Bus struct constructor.
 impl Bus {
     pub fn new(bus_id: usize, bus_name: String, bus_type: BusType) -> Self {
         Self {
             bus_id,
             bus_name,
-            bus_status: bus_type != BusType::OOS,
+            bus_status: bus_type != BusType::OUT,
             bus_type,
             nom_voltage: 0.0,
             voltage: 1.0,
@@ -64,6 +69,7 @@ impl Bus {
     }
 }
 
+/// Bus struct display implementation.
 impl fmt::Display for Bus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -74,6 +80,7 @@ impl fmt::Display for Bus {
     }
 }
 
+/// Load struct constructor.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Load {
     pub load_id: usize,
@@ -84,6 +91,7 @@ pub struct Load {
     pub imag_load: f32,
 }
 
+/// Load struct display implementation.
 impl Load {
     pub fn new(
         load_id: usize,
@@ -102,6 +110,7 @@ impl Load {
     }
 }
 
+/// Load struct display implementation.
 impl fmt::Display for Load {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -112,12 +121,14 @@ impl fmt::Display for Load {
     }
 }
 
+/// BranchType enum display implementation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum BranchType {
     Line,
     TwoWinding,
 }
 
+/// BranchType enum display implementation.
 impl fmt::Display for BranchType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -152,6 +163,9 @@ pub struct Branch {
     // Limits
     pub operating_limit: f32,
     pub contingency_limit: f32,
+
+    // Solution
+    pub flow: f32,
 }
 
 impl Branch {
@@ -180,6 +194,7 @@ impl Branch {
             phase_shift: 0.0,
             operating_limit: 0.0,
             contingency_limit: 0.0,
+            flow: 0.0,
         }
     }
 }
@@ -320,12 +335,57 @@ impl Network {
         }
     }
 
+    /// Compute (P_mismatch, Q_mismatch) for a given bus.
+    /// P_mis = P_gen - P_load - P_flow_out
+    /// Q_mis = Q_gen - Q_load
+    pub fn bus_mismatch(&self, bus_id: usize) -> (f32, f32) {
+        let p_gen: f32 = self
+            .generators
+            .iter()
+            .filter(|g| g.gen_bus_id == bus_id && g.gen_status)
+            .map(|g| g.p_gen)
+            .sum();
+        let q_gen: f32 = self
+            .generators
+            .iter()
+            .filter(|g| g.gen_bus_id == bus_id && g.gen_status)
+            .map(|g| g.q_gen)
+            .sum();
+        let p_load: f32 = self
+            .loads
+            .iter()
+            .filter(|l| l.bus_id == bus_id)
+            .map(|l| l.real_load)
+            .sum();
+        let q_load: f32 = self
+            .loads
+            .iter()
+            .filter(|l| l.bus_id == bus_id)
+            .map(|l| l.imag_load)
+            .sum();
+        let p_flow_out: f32 = self
+            .branches
+            .iter()
+            .filter(|br| br.branch_status)
+            .map(|br| {
+                if br.from_bus == bus_id {
+                    br.flow
+                } else if br.to_bus == bus_id {
+                    -br.flow
+                } else {
+                    0.0
+                }
+            })
+            .sum();
+        (p_gen - p_load - p_flow_out, q_gen - q_load)
+    }
+
     /// Rebuild bus_map from current buses list (must be called after any bus change)
     pub fn rebuild_bus_map(&mut self) {
         self.bus_map.clear();
         let mut matrix_idx: usize = 0;
         for bus in &self.buses {
-            if bus.bus_type != BusType::Slack {
+            if bus.bus_type != BusType::Slack && bus.bus_type != BusType::OUT {
                 self.bus_map.insert(bus.bus_id, matrix_idx);
                 matrix_idx += 1;
             }

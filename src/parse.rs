@@ -128,7 +128,7 @@ pub fn parse_raw_str(content: &str) -> Network {
                         3 => BusType::Slack,
                         2 => BusType::PV,
                         1 => BusType::PQ,
-                        4 => BusType::OOS,
+                        4 => BusType::OUT,
                         _ => {
                             eprintln!("Unknown bus type code: {}", ide);
                             std::process::exit(1);
@@ -248,6 +248,7 @@ pub fn parse_raw_str(content: &str) -> Network {
                         phase_shift: 0.0,
                         operating_limit: rate_a,
                         contingency_limit: rate_b,
+                        flow: 0.0,
                     });
                     branch_index += 1;
                 }
@@ -344,6 +345,7 @@ pub fn parse_raw_str(content: &str) -> Network {
                     phase_shift: angle,
                     operating_limit: rate_a,
                     contingency_limit: rate_b,
+                    flow: 0.0,
                 });
                 branch_index += 1;
             }

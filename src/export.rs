@@ -19,7 +19,7 @@ pub fn network_to_raw(net: &Network) -> String {
             BusType::Slack => 3u8,
             BusType::PV => 2,
             BusType::PQ => 1,
-            BusType::OOS => 4,
+            BusType::OUT => 4,
         };
         out.push_str(&format!(
             " {}, '{}', {:.1}, {}, 1, 1, 1, {:.6}, {:.6}, {:.4}, {:.4}, {:.4}, {:.4}\n",
