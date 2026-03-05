@@ -1,5 +1,4 @@
 use crate::case::*;
-use log::debug;
 use rsparse::data::Trpl;
 
 impl Network {
@@ -8,7 +7,6 @@ impl Network {
     pub fn dc_approximation(&mut self) -> bool {
         self.rebuild_bus_map();
         let n = self.bus_map.len();
-        debug!("Found {:>6} non-slack buses", n);
 
         if n == 0 {
             return false;
@@ -36,17 +34,12 @@ impl Network {
             }
 
             let bij = 1.0 / branch.reactance as f64;
-            debug!(
-                "b matrix entry for branch from {} to {} is {}",
-                branch.from_bus, branch.to_bus, bij
-            );
 
             let from = self.bus_map.get(&branch.from_bus);
             let to = self.bus_map.get(&branch.to_bus);
 
             // B'_ii += 1/X, B'_jj += 1/X, B'_ij -= 1/X, B'_ji -= 1/X
             if let (Some(&i), Some(&j)) = (from, to) {
-                debug!("i: {:>6}, j: {:>6}", i, j);
                 b_prime.append(i, i, bij);
                 b_prime.append(j, j, bij);
                 b_prime.append(i, j, -bij);
@@ -58,7 +51,6 @@ impl Network {
             }
         }
         b_prime.sum_dupl();
-        debug!("B'=\n{:?}", b_prime.to_sprs().to_dense());
 
         // Build P injection vector (in per unit)
         let mut p = vec![0.0f64; n];
@@ -79,8 +71,7 @@ impl Network {
 
         // Solve B' * theta = P
         let csc = b_prime.to_sprs();
-        if let Err(e) = rsparse::lusol(&csc, &mut p, 0, 1e-6) {
-            debug!("DC solve failed: {:?}", e);
+        if rsparse::lusol(&csc, &mut p, 0, 1e-6).is_err() {
             return false;
         }
         // p now contains theta (radians) for each non-slack bus

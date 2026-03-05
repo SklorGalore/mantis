@@ -1,8 +1,6 @@
 use std::fs;
 use std::io::{self, BufRead};
 
-use log::info;
-
 use crate::case::*;
 
 /// strip slashes or quotes from fields
@@ -358,14 +356,6 @@ pub fn parse_raw_str(content: &str) -> Network {
 
     // Build bus_map: bus_id -> matrix index (excluding slack)
     network.rebuild_bus_map();
-
-    info!(
-        "Parsed {} buses, {} loads, {} generators, {} branches",
-        network.buses.len(),
-        network.loads.len(),
-        network.generators.len(),
-        network.branches.len(),
-    );
 
     network
 }

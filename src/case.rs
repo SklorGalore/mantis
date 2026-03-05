@@ -1,9 +1,8 @@
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
 /// Bus type enum.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum BusType {
     Slack, // slack, swing, Vd, reference bus
     PQ,    // load bus
@@ -24,7 +23,7 @@ impl fmt::Display for BusType {
 }
 
 /// Bus struct with the necessary fields for a power system bus.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Bus {
     // Identifiers
     pub bus_id: usize,
@@ -81,7 +80,7 @@ impl fmt::Display for Bus {
 }
 
 /// Load struct constructor.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Load {
     pub load_id: usize,
     pub bus_id: usize,
@@ -122,7 +121,7 @@ impl fmt::Display for Load {
 }
 
 /// BranchType enum display implementation.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BranchType {
     Line,
     TwoWinding,
@@ -138,7 +137,7 @@ impl fmt::Display for BranchType {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Branch {
     // Identifiers
     pub branch_type: BranchType,
@@ -218,7 +217,7 @@ impl fmt::Display for Branch {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Generator {
     // Identifiers
     pub gen_id: usize,
@@ -266,7 +265,7 @@ impl fmt::Display for Generator {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Network {
     pub case_name: String,
     pub s_base: f32,
@@ -276,7 +275,6 @@ pub struct Network {
     pub branches: Vec<Branch>,
     pub loads: Vec<Load>,
     pub generators: Vec<Generator>,
-    #[serde(skip)]
     pub bus_map: HashMap<usize, usize>, // bus_id -> matrix index (slack excluded)
 }
 
