@@ -141,22 +141,72 @@ pub fn run_cli() {
                 }
             }
 
+            "import" => {
+                if parts.len() < 2 {
+                    println!("Usage: import <file.json|file.bin>");
+                    continue;
+                }
+                let path = parts[1];
+                let result: Result<Network, String> = if path.ends_with(".bin") {
+                    std::fs::read(path)
+                        .map_err(|e| format!("Error reading file: {}", e))
+                        .and_then(|bytes| {
+                            bincode::deserialize(&bytes)
+                                .map_err(|e| format!("Error parsing bincode: {}", e))
+                        })
+                } else {
+                    std::fs::read_to_string(path)
+                        .map_err(|e| format!("Error reading file: {}", e))
+                        .and_then(|contents| {
+                            serde_json::from_str(&contents)
+                                .map_err(|e| format!("Error parsing JSON: {}", e))
+                        })
+                };
+                match result {
+                    Ok(mut n) => {
+                        n.rebuild_bus_map();
+                        println!(
+                            "Imported: {} ({} buses, {} branches, {} generators, {} loads)",
+                            n.case_name,
+                            n.buses.len(),
+                            n.branches.len(),
+                            n.generators.len(),
+                            n.loads.len()
+                        );
+                        net = Some(n);
+                    }
+                    Err(e) => println!("{}", e),
+                }
+            }
+
             "export" => {
                 let Some(ref n) = net else {
                     println!("No case loaded.");
                     continue;
                 };
                 if parts.len() < 2 {
-                    println!("Usage: export <file>");
+                    println!("Usage: export <file.json|file.bin>");
                     continue;
                 }
                 let path = parts[1];
-                match serde_json::to_string(n) {
-                    Ok(json) => match std::fs::write(path, &json) {
-                        Ok(_) => println!("Exported to {}", path),
-                        Err(e) => println!("Error writing file: {}", e),
-                    },
-                    Err(e) => println!("Error serializing: {}", e),
+                let result: Result<(), String> = if path.ends_with(".bin") {
+                    bincode::serialize(n)
+                        .map_err(|e| format!("Error serializing: {}", e))
+                        .and_then(|bytes| {
+                            std::fs::write(path, &bytes)
+                                .map_err(|e| format!("Error writing file: {}", e))
+                        })
+                } else {
+                    serde_json::to_string_pretty(n)
+                        .map_err(|e| format!("Error serializing: {}", e))
+                        .and_then(|json| {
+                            std::fs::write(path, &json)
+                                .map_err(|e| format!("Error writing file: {}", e))
+                        })
+                };
+                match result {
+                    Ok(_) => println!("Exported to {}", path),
+                    Err(e) => println!("{}", e),
                 }
             }
 
@@ -187,7 +237,8 @@ pub fn run_cli() {
                 println!("  branches      Print branch table");
                 println!("  generators    Print generator table");
                 println!("  loads         Print load table");
-                println!("  export <file> Export network as JSON");
+                println!("  import <file> Load network from file (.json or .bin)");
+                println!("  export <file> Export network to file (.json or .bin)");
                 println!("  help          Show this help");
                 println!("  quit / exit   Exit");
             }
