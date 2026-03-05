@@ -2,16 +2,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
-fn is_zero(v: &f32) -> bool { *v == 0.0 }
-fn is_true(v: &bool) -> bool { *v }
-fn is_empty_str(v: &String) -> bool { v.is_empty() }
-fn default_true() -> bool { true }
-fn default_one() -> f32 { 1.0 }
-fn default_v_min_op() -> f32 { 0.9 }
-fn default_v_min_ct() -> f32 { 0.95 }
-fn default_v_max_op() -> f32 { 1.05 }
-fn default_v_max_ct() -> f32 { 1.1 }
-
 /// Bus type enum.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum BusType {
@@ -39,28 +29,15 @@ pub struct Bus {
     pub bus_id: usize,
     pub bus_name: String,
     pub bus_type: BusType,
-    #[serde(skip_serializing_if = "is_zero")]
     pub nom_voltage: f32,
-    #[serde(default = "default_true", skip_serializing_if = "is_true")]
     pub bus_status: bool,
-
-    #[serde(default = "default_one", skip_serializing_if = "is_zero")]
     pub voltage: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub angle: f32,
-
-    #[serde(skip_serializing_if = "is_zero")]
     pub real_shunt: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub imag_shunt: f32,
-
-    #[serde(default = "default_v_min_op", skip_serializing_if = "is_zero")]
     pub v_min_operating: f32,
-    #[serde(default = "default_v_min_ct", skip_serializing_if = "is_zero")]
     pub v_min_contingency: f32,
-    #[serde(default = "default_v_max_op", skip_serializing_if = "is_zero")]
     pub v_max_operating: f32,
-    #[serde(default = "default_v_max_ct", skip_serializing_if = "is_zero")]
     pub v_max_contingency: f32,
 }
 
@@ -160,34 +137,18 @@ pub struct Branch {
     pub id: usize,
     pub from_bus: usize,
     pub to_bus: usize,
-    #[serde(skip_serializing_if = "is_empty_str")]
     pub branch_name: String,
-    #[serde(default = "default_true", skip_serializing_if = "is_true")]
     pub branch_status: bool,
-
-    #[serde(skip_serializing_if = "is_zero")]
     pub resistance: f32,
     pub reactance: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub from_shunt_conductance: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub from_shunt_susceptance: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub to_shunt_conductance: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub to_shunt_susceptance: f32,
-
-    #[serde(default = "default_one", skip_serializing_if = "is_zero")]
     pub tap_ratio: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub phase_shift: f32,
-
-    #[serde(skip_serializing_if = "is_zero")]
     pub operating_limit: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub contingency_limit: f32,
-
-    #[serde(skip_serializing_if = "is_zero")]
     pub flow: f32,
 }
 
@@ -246,23 +207,13 @@ pub struct Generator {
     pub gen_id: usize,
     pub gen_bus_id: usize,
     pub gen_name: String,
-    #[serde(default = "default_true", skip_serializing_if = "is_true")]
     pub gen_status: bool,
-
-    #[serde(skip_serializing_if = "is_zero")]
     pub p_gen: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub q_gen: f32,
-    #[serde(default = "default_one", skip_serializing_if = "is_zero")]
     pub v_setpoint: f32,
-
-    #[serde(skip_serializing_if = "is_zero")]
     pub p_min: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub p_max: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub q_min: f32,
-    #[serde(skip_serializing_if = "is_zero")]
     pub q_max: f32,
 }
 
