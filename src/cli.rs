@@ -2,26 +2,28 @@ use crate::case::Network;
 use crate::parse::read_case_v33;
 use std::io::{self, Write};
 
+/// Runs the interactive command-line interface
 pub fn run_cli() {
     let mut net: Option<Network> = None;
 
     println!("mantis - power systems analysis");
     println!("Type 'help' for available commands.\n");
 
-    loop {
+    'cli: loop {
         print!("mantis> ");
         io::stdout().flush().unwrap();
 
         let mut input = String::new();
         if io::stdin().read_line(&mut input).is_err() || input.is_empty() {
-            break;
+            break 'cli;
         }
 
         let parts: Vec<&str> = input.trim().split_whitespace().collect();
         if parts.is_empty() {
-            continue;
+            continue 'cli;
         }
 
+        // pick chosen input string
         match parts[0] {
             "open" => {
                 if parts.len() < 2 {
@@ -32,7 +34,7 @@ pub fn run_cli() {
                             for entry in entries.flatten() {
                                 let name = entry.file_name();
                                 let name = name.to_string_lossy();
-                                if name.ends_with(".raw") {
+                                if name.to_lowercase().ends_with(".raw") {
                                     println!("  {}", name);
                                 }
                             }
@@ -40,7 +42,7 @@ pub fn run_cli() {
                         Err(e) => println!("Could not read cases/: {}", e),
                     }
                     println!("Usage: open <filename>");
-                    continue;
+                    continue 'cli;
                 }
                 let filename = parts[1];
                 let path = format!("cases/{}", filename);
@@ -59,7 +61,7 @@ pub fn run_cli() {
             "solve" => {
                 let Some(ref mut n) = net else {
                     println!("No case loaded. Use 'open <filename>' first.");
-                    continue;
+                    continue 'cli;
                 };
                 if n.dc_approximation() {
                     println!("DC load flow solved successfully.");
@@ -71,7 +73,7 @@ pub fn run_cli() {
             "buses" => {
                 let Some(ref n) = net else {
                     println!("No case loaded.");
-                    continue;
+                    continue 'cli;
                 };
                 println!(
                     "{:>5}  {:<14}  {:>4}  {:>8}  {:>9}  {:>10}  {:>10}",
@@ -96,7 +98,7 @@ pub fn run_cli() {
             "branches" => {
                 let Some(ref n) = net else {
                     println!("No case loaded.");
-                    continue;
+                    continue 'cli;
                 };
                 println!(
                     "{:>4}  {:>5}  {:>5}  {:>4}  {:>10}  {:>10}  {:>10}  {:>6}",
@@ -121,7 +123,7 @@ pub fn run_cli() {
             "generators" => {
                 let Some(ref n) = net else {
                     println!("No case loaded.");
-                    continue;
+                    continue 'cli;
                 };
                 println!(
                     "{:>4}  {:>5}  {:<16}  {:>10}  {:>10}  {:>6}",
@@ -144,7 +146,7 @@ pub fn run_cli() {
             "import" => {
                 if parts.len() < 2 {
                     println!("Usage: import <file.json|file.bin>");
-                    continue;
+                    continue 'cli;
                 }
                 let path = parts[1];
                 let result: Result<Network, String> = if path.ends_with(".bin") {
@@ -182,11 +184,11 @@ pub fn run_cli() {
             "export" => {
                 let Some(ref n) = net else {
                     println!("No case loaded.");
-                    continue;
+                    continue 'cli;
                 };
                 if parts.len() < 2 {
                     println!("Usage: export <file.json|file.bin>");
-                    continue;
+                    continue 'cli;
                 }
                 let path = parts[1];
                 let result: Result<(), String> = if path.ends_with(".bin") {
@@ -213,7 +215,7 @@ pub fn run_cli() {
             "loads" => {
                 let Some(ref n) = net else {
                     println!("No case loaded.");
-                    continue;
+                    continue 'cli;
                 };
                 println!(
                     "{:>4}  {:>5}  {:<20}  {:>10}  {:>10}",
@@ -245,7 +247,7 @@ pub fn run_cli() {
 
             "quit" | "exit" => {
                 println!("Goodbye.");
-                break;
+                break 'cli;
             }
 
             other => println!("Unknown command: '{}'. Type 'help' for commands.", other),
