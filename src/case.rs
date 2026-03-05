@@ -1,8 +1,19 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
+fn is_zero(v: &f32) -> bool { *v == 0.0 }
+fn is_true(v: &bool) -> bool { *v }
+fn is_empty_str(v: &String) -> bool { v.is_empty() }
+fn default_true() -> bool { true }
+fn default_one() -> f32 { 1.0 }
+fn default_v_min_op() -> f32 { 0.9 }
+fn default_v_min_ct() -> f32 { 0.95 }
+fn default_v_max_op() -> f32 { 1.05 }
+fn default_v_max_ct() -> f32 { 1.1 }
+
 /// Bus type enum.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum BusType {
     Slack, // slack, swing, Vd, reference bus
     PQ,    // load bus
@@ -23,27 +34,33 @@ impl fmt::Display for BusType {
 }
 
 /// Bus struct with the necessary fields for a power system bus.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Bus {
-    // Identifiers
     pub bus_id: usize,
     pub bus_name: String,
     pub bus_type: BusType,
+    #[serde(skip_serializing_if = "is_zero")]
     pub nom_voltage: f32,
+    #[serde(default = "default_true", skip_serializing_if = "is_true")]
     pub bus_status: bool,
 
-    // Voltage
+    #[serde(default = "default_one", skip_serializing_if = "is_zero")]
     pub voltage: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub angle: f32,
 
-    // Shunts
+    #[serde(skip_serializing_if = "is_zero")]
     pub real_shunt: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub imag_shunt: f32,
 
-    // Limits
+    #[serde(default = "default_v_min_op", skip_serializing_if = "is_zero")]
     pub v_min_operating: f32,
+    #[serde(default = "default_v_min_ct", skip_serializing_if = "is_zero")]
     pub v_min_contingency: f32,
+    #[serde(default = "default_v_max_op", skip_serializing_if = "is_zero")]
     pub v_max_operating: f32,
+    #[serde(default = "default_v_max_ct", skip_serializing_if = "is_zero")]
     pub v_max_contingency: f32,
 }
 
@@ -80,7 +97,7 @@ impl fmt::Display for Bus {
 }
 
 /// Load struct constructor.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Load {
     pub load_id: usize,
     pub bus_id: usize,
@@ -121,7 +138,7 @@ impl fmt::Display for Load {
 }
 
 /// BranchType enum display implementation.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum BranchType {
     Line,
     TwoWinding,
@@ -137,33 +154,40 @@ impl fmt::Display for BranchType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Branch {
-    // Identifiers
     pub branch_type: BranchType,
     pub id: usize,
     pub from_bus: usize,
     pub to_bus: usize,
+    #[serde(skip_serializing_if = "is_empty_str")]
     pub branch_name: String,
+    #[serde(default = "default_true", skip_serializing_if = "is_true")]
     pub branch_status: bool,
 
-    // Impedance data
+    #[serde(skip_serializing_if = "is_zero")]
     pub resistance: f32,
     pub reactance: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub from_shunt_conductance: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub from_shunt_susceptance: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub to_shunt_conductance: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub to_shunt_susceptance: f32,
 
-    // Transformer data
+    #[serde(default = "default_one", skip_serializing_if = "is_zero")]
     pub tap_ratio: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub phase_shift: f32,
 
-    // Limits
+    #[serde(skip_serializing_if = "is_zero")]
     pub operating_limit: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub contingency_limit: f32,
 
-    // Solution
+    #[serde(skip_serializing_if = "is_zero")]
     pub flow: f32,
 }
 
@@ -217,23 +241,28 @@ impl fmt::Display for Branch {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Generator {
-    // Identifiers
     pub gen_id: usize,
     pub gen_bus_id: usize,
     pub gen_name: String,
+    #[serde(default = "default_true", skip_serializing_if = "is_true")]
     pub gen_status: bool,
 
-    // Setpoints
+    #[serde(skip_serializing_if = "is_zero")]
     pub p_gen: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub q_gen: f32,
+    #[serde(default = "default_one", skip_serializing_if = "is_zero")]
     pub v_setpoint: f32,
 
-    // Limits
+    #[serde(skip_serializing_if = "is_zero")]
     pub p_min: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub p_max: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub q_min: f32,
+    #[serde(skip_serializing_if = "is_zero")]
     pub q_max: f32,
 }
 
@@ -265,7 +294,7 @@ impl fmt::Display for Generator {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Network {
     pub case_name: String,
     pub s_base: f32,
@@ -275,6 +304,7 @@ pub struct Network {
     pub branches: Vec<Branch>,
     pub loads: Vec<Load>,
     pub generators: Vec<Generator>,
+    #[serde(skip)]
     pub bus_map: HashMap<usize, usize>, // bus_id -> matrix index (slack excluded)
 }
 

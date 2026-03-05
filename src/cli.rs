@@ -141,6 +141,25 @@ pub fn run_cli() {
                 }
             }
 
+            "export" => {
+                let Some(ref n) = net else {
+                    println!("No case loaded.");
+                    continue;
+                };
+                if parts.len() < 2 {
+                    println!("Usage: export <file>");
+                    continue;
+                }
+                let path = parts[1];
+                match serde_json::to_string(n) {
+                    Ok(json) => match std::fs::write(path, &json) {
+                        Ok(_) => println!("Exported to {}", path),
+                        Err(e) => println!("Error writing file: {}", e),
+                    },
+                    Err(e) => println!("Error serializing: {}", e),
+                }
+            }
+
             "loads" => {
                 let Some(ref n) = net else {
                     println!("No case loaded.");
@@ -168,6 +187,7 @@ pub fn run_cli() {
                 println!("  branches      Print branch table");
                 println!("  generators    Print generator table");
                 println!("  loads         Print load table");
+                println!("  export <file> Export network as JSON");
                 println!("  help          Show this help");
                 println!("  quit / exit   Exit");
             }
