@@ -4,3 +4,5 @@ CLAUDE.md
 *.log
 *.txt
 .idea/
+*.bin
+*.json
